@@ -33,3 +33,4 @@ int decodeGrayCodes(int proj_width, int proj_height, IplImage**& gray_codes /* b
 
 int generateGrayCodes(int width, int height, IplImage**& gray_codes, int& n_cols, int& n_rows, int& col_shift, int& row_shift, bool sl_scan_cols, bool sl_scan_rows);
 
+int generateGrayCodes_S(int width, int height, IplImage**& gray_codes, int& n_cols, int& n_rows, int& col_shift, int& row_shift, bool sl_scan_cols, bool sl_scan_rows);

@@ -29,9 +29,8 @@ int main(int argc, char* argv[])
 		gray_ncols, gray_nrows, gray_colshift, gray_rowshift, 
 		true /*sl_params->scan_cols*/, true /*sl_params->scan_rows*/);
 
-	cout << (gray_ncols+gray_nrows+1) << endl;
-
-	char dir[30], buf[30];
+	cout << gray_ncols << gray_nrows << endl;
+	char dir[100], buf[100], buf2[1000];
 	sprintf(dir, "%d x %d", width, height);
 	mkdir(dir, 0776);
 
@@ -39,8 +38,27 @@ int main(int argc, char* argv[])
 	{
 		sprintf(buf, "%s/code_%d.png", dir, i);
 		cvSaveImage(buf, proj_gray_codes[i]);
+		cvReleaseImage(&proj_gray_codes[i]);
 	}
 
+	delete[] proj_gray_codes;
+
+	IplImage** proj_gray_codes_S = NULL;
+	generateGrayCodes_S(width /*sl_params->proj_w*/, height /*sl_params->proj_h*/, proj_gray_codes_S, 
+		gray_ncols, gray_nrows, gray_colshift, gray_rowshift, 
+		true /*sl_params->scan_cols*/, true /*sl_params->scan_rows*/);
+
+	sprintf(dir, "%d x %d : shifting", width, height);
+	mkdir(dir, 0776);
+
+	for(int i=0; i<=(gray_ncols+gray_nrows+12); i++)
+	{
+		sprintf(buf2, "%s/code_%d.png", dir, i);
+		cvSaveImage(buf2, proj_gray_codes_S[i]);
+		cvReleaseImage(&proj_gray_codes_S[i]);
+	}
+
+	delete[] proj_gray_codes;
 	
 /*	// Parse command line arguments.
 	printf("[Structured Lighting for 3D Scanning]\n");
@@ -282,6 +300,7 @@ int main(int argc, char* argv[])
 	// Exit without errors.
 	cvReleaseCapture(&capture);
 	cvDestroyWindow("projWindow");
+	*/
 	return 0;
-    */
+    
 }
