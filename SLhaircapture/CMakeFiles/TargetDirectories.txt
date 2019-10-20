@@ -1,0 +1,3 @@
+/home/givenone/SLhaircapture/SLhaircapture/CMakeFiles/rebuild_cache.dir
+/home/givenone/SLhaircapture/SLhaircapture/CMakeFiles/temp.dir
+/home/givenone/SLhaircapture/SLhaircapture/CMakeFiles/edit_cache.dir

@@ -15,16 +15,18 @@
 //   Brown University
 //   July 2009
 
-#pragma once
+//#pragma once
 
 // Exclude rarely-used items from Windows headers.
 #define WIN32_LEAN_AND_MEAN
 
 // Define commonly included files.
 #include <stdio.h>
-#include <tchar.h>
-#include "cv.h"
-#include "highgui.h"
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui.hpp>
 #include <math.h>
-#include <direct.h>
-#include <conio.h>
+//#include <direct.h>
+//#include <conio.h>
+
+using namespace cv;
+using namespace std;

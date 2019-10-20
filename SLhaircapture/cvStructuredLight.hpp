@@ -18,6 +18,8 @@
 //   July 2009
 
 // Define structure for storing structured lighting parameters.
+#include "stdafx.h"
+
 struct slParams{
 
 	// Output options.
