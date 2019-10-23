@@ -3,6 +3,7 @@
 #include "cvStructuredLight.hpp"
 #include "cvScanProCam.h"
 #include "cvUtilProCam.h"
+#include "cvCalibrateProCam.h"
 
 #include <sys/stat.h>
 
@@ -64,9 +65,9 @@ int main(int argc, char* argv[])
 	
 	int cam_nelems                  = sl_params.cam_w*sl_params.cam_h;
 	int proj_nelems                 = sl_params.proj_w*sl_params.proj_h;
-    sl_calib.cam_intrinsic_calib    = false;
-	sl_calib.proj_intrinsic_calib   = false;
-	sl_calib.procam_extrinsic_calib = false;
+    sl_calib.cam_intrinsic_calib    = true;
+	sl_calib.proj_intrinsic_calib   = true;
+	sl_calib.procam_extrinsic_calib = true;
 	sl_calib.cam_intrinsic          = cvCreateMat(3,3,CV_32FC1); 
 	sl_calib.cam_distortion         = cvCreateMat(5,1,CV_32FC1); 
 	sl_calib.cam_extrinsic          = cvCreateMat(2, 3, CV_32FC1);
@@ -80,6 +81,9 @@ int main(int argc, char* argv[])
 	sl_calib.proj_column_planes     = cvCreateMat(sl_params.proj_w, 4, CV_32FC1);
 	sl_calib.proj_row_planes        = cvCreateMat(sl_params.proj_h, 4, CV_32FC1);
 
+//	double center[3] = {0, 0, 0};
+//	cvInitMatHeader(sl_calib.proj_center, 3, 3, CV_32FC1, center); this is done in "evaluate pro cam in calibrateprocam.cpp"
+	
 	double cam_intrinsic[3][3] = { {6799.891745995248, 0, 1684.663925292664}, {0, 6819.065266606978, 897.2080419838242}, {0, 0, 1}};
 	double cam_distortion[5] = { -0.1081234940885747, 1.019777262201034, -0.01496156727613678, 0.007012687213256888, 0};
 	cvInitMatHeader(sl_calib.cam_intrinsic, 3, 3, CV_32FC1, cam_intrinsic);
@@ -116,6 +120,13 @@ int main(int argc, char* argv[])
 	for(int i=0; i<3; i++) CV_MAT_ELEM(sl_calib.proj_extrinsic, float, 0, i) = (float)cvmGet(r, 0, i);
 	for(int i=0; i<3; i++) CV_MAT_ELEM(sl_calib.proj_extrinsic, float, 1, i) = (float)cvmGet(t, 0, i);
 
+	cvReleaseMat(&r);
+	cvReleaseMat(&t);
+	cvReleaseMat(&R);
+
+	// precalcuate using calibration data
+
+	evaluateProCamGeometry(&sl_params, &sl_calib); 
 /*
 	프로젝터가 원점 ! -> no extrinsic value
 */
