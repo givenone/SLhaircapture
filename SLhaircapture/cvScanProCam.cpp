@@ -221,7 +221,8 @@ int decodeGrayCodes(int proj_width, int proj_height,
 	cvOr(temp, mask, mask);
 
 	cvAdd(gray_1, gray_2, thresh_hold);
-	thresh_hold = thresh_hold / 2; // mean of 2 images.
+	cvSet(temp, cvScalar(2));
+	cvDiv(thresh_hold, temp, thresh_hold); // mean of 2 images.
 
 	// Decode Gray codes for projector columns.
 	cvZero(decoded_cols);
@@ -235,7 +236,7 @@ int decodeGrayCodes(int proj_width, int proj_height,
 		if(i>0)
 			cvXor(bit_plane_1, bit_plane_2, bit_plane_1);
 		else
-			cvCopyImage(bit_plane_2, bit_plane_1);
+			cvCopy(bit_plane_2, bit_plane_1);
 		cvAddS(decoded_cols, cvScalar(pow(2.0,n_cols-i-1)), decoded_cols, bit_plane_1);
 	}
 	cvSubS(decoded_cols, cvScalar(col_shift), decoded_cols);
@@ -252,7 +253,7 @@ int decodeGrayCodes(int proj_width, int proj_height,
 		if(i>0)
 			cvXor(bit_plane_1, bit_plane_2, bit_plane_1);
 		else
-			cvCopyImage(bit_plane_2, bit_plane_1);
+			cvCopy(bit_plane_2, bit_plane_1);
 		cvAddS(decoded_rows, cvScalar(pow(2.0,n_rows-i-1)), decoded_rows, bit_plane_1);
 	}
 	cvSubS(decoded_rows, cvScalar(row_shift), decoded_rows);

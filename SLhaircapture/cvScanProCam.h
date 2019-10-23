@@ -45,3 +45,12 @@ int reconstructStructuredLight(struct slParams* sl_params,
 							   CvMat*&    colors,
 							   CvMat*&    depth_map,
 							   CvMat*&    mask);
+
+int displayDecodingResults(IplImage*& decoded_cols, 
+						   IplImage*& decoded_rows, 
+						   IplImage*& mask,
+						   struct slParams* sl_params);
+
+int displayDepthMap(CvMat*& depth_map,
+					IplImage*& mask,
+				    struct slParams* sl_params);

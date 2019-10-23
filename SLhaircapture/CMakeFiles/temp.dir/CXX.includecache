@@ -6,6 +6,18 @@
 
 #IncludeRegexTransform: 
 
+/home/givenone/SLhaircapture/SLhaircapture/cvCalibrateProCam.cpp
+stdafx.h
+/home/givenone/SLhaircapture/SLhaircapture/stdafx.h
+cvStructuredLight.hpp
+/home/givenone/SLhaircapture/SLhaircapture/cvStructuredLight.hpp
+cvCalibrateProCam.h
+/home/givenone/SLhaircapture/SLhaircapture/cvCalibrateProCam.h
+cvUtilProCam.h
+/home/givenone/SLhaircapture/SLhaircapture/cvUtilProCam.h
+
+/home/givenone/SLhaircapture/SLhaircapture/cvCalibrateProCam.h
+
 /home/givenone/SLhaircapture/SLhaircapture/cvScanProCam.cpp
 stdafx.h
 /home/givenone/SLhaircapture/SLhaircapture/stdafx.h
@@ -13,6 +25,8 @@ cvStructuredLight.hpp
 /home/givenone/SLhaircapture/SLhaircapture/cvStructuredLight.hpp
 cvScanProCam.h
 /home/givenone/SLhaircapture/SLhaircapture/cvScanProCam.h
+cvUtilProCam.h
+/home/givenone/SLhaircapture/SLhaircapture/cvUtilProCam.h
 
 /home/givenone/SLhaircapture/SLhaircapture/cvScanProCam.h
 
@@ -23,12 +37,26 @@ cvStructuredLight.hpp
 /home/givenone/SLhaircapture/SLhaircapture/cvStructuredLight.hpp
 cvScanProCam.h
 /home/givenone/SLhaircapture/SLhaircapture/cvScanProCam.h
+cvUtilProCam.h
+/home/givenone/SLhaircapture/SLhaircapture/cvUtilProCam.h
+cvCalibrateProCam.h
+/home/givenone/SLhaircapture/SLhaircapture/cvCalibrateProCam.h
 sys/stat.h
 -
 
 /home/givenone/SLhaircapture/SLhaircapture/cvStructuredLight.hpp
 stdafx.h
 /home/givenone/SLhaircapture/SLhaircapture/stdafx.h
+
+/home/givenone/SLhaircapture/SLhaircapture/cvUtilProCam.cpp
+stdafx.h
+/home/givenone/SLhaircapture/SLhaircapture/stdafx.h
+cvStructuredLight.hpp
+/home/givenone/SLhaircapture/SLhaircapture/cvStructuredLight.hpp
+cvUtilProCam.h
+/home/givenone/SLhaircapture/SLhaircapture/cvUtilProCam.h
+
+/home/givenone/SLhaircapture/SLhaircapture/cvUtilProCam.h
 
 /home/givenone/SLhaircapture/SLhaircapture/stdafx.cpp
 stdafx.h

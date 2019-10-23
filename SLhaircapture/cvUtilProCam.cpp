@@ -16,16 +16,9 @@
 //   Douglas Lanman
 //   Brown University
 //   July 2009
-
 #include "stdafx.h"
-#include "cvStructuredLight.h"
+#include "cvStructuredLight.hpp"
 #include "cvUtilProCam.h"
-
-// Calculate the base 2 logarithm.
-double log2(double x)
-{
-    return log(x)/log(2.0);
-}
 
 // Fit a hyperplane to a set of ND points.
 // Note: Input points must be in the form of an NxM matrix, where M is the dimensionality.
@@ -133,15 +126,6 @@ void intersectLineWithLine3D(const float* q1,
 		p[i] = ( (q1[i]+s*v1[i]) + (q2[i]+t*v2[i]) )/2;
 }
 
-// Define camera capture (support Logitech QuickCam 9000 raw-mode).
-IplImage* cvQueryFrame2(CvCapture* capture, struct slParams* sl_params, bool return_raw){
-	IplImage* cam_frame = cvQueryFrame(capture);
-	if(sl_params->Logitech_9000)
-		cvCvtLogitech9000Raw(cam_frame, return_raw);
-	return cam_frame;
-}
-
-
 // Save a VRML-formatted point cloud.
 int savePointsVRML(char* filename, 
 				   CvMat* points,
@@ -230,7 +214,7 @@ int savePointsVRML(char* filename,
 void readConfiguration(const char* filename, struct slParams* sl_params){
 
 	// Open file storage for XML-formatted configuration file.
-	CvFileStorage* fs = cvOpenFileStorage(filename, 0, CV_STORAGE_READ);
+	//CvFileStorage* fs = cvOpenFileStorage(filename, 0, CV_STORAGE_READ);
 
 	// Read output directory and object (or sequence) name.
 
@@ -266,6 +250,8 @@ void readConfiguration(const char* filename, struct slParams* sl_params){
 	sl_params->cam_board_h_mm = (float)cvReadRealByName(fs, m, "square_height_mm",            30.0);
 */	
 	// Read scanning and reconstruction parameters.
+
+	// **** mode 1이면 ray-plane or ray-ray 2이면 ray-ray
 	sl_params->mode                    =  2;      // cvReadIntByName(fs,  m, "mode",                               2);
 	sl_params->scan_cols               =  true; //      (cvReadIntByName(fs,  m, "reconstruct_columns",                1) != 0);
 	sl_params->scan_rows               =  true; //      (cvReadIntByName(fs,  m, "reconstruct_rows",                   1) != 0);
@@ -282,25 +268,5 @@ void readConfiguration(const char* filename, struct slParams* sl_params){
 		sl_params->scan_cols = true;
 		sl_params->scan_rows = true;
 	}
-
-	// Close file storage for XML-formatted configuration file.
-	cvReleaseFileStorage(&fs);
 }
 
-// In-place conversion of a 10-bit raw image to an 8-bit BGR image.
-// Note: Only works with Logitech QuickCam 9000 in 10-bit raw-mode (with a Bayer BGGR mosaic).
-//       See: http://www.quickcamteam.net/documentation/how-to/how-to-enable-raw-streaming-on-logitech-webcams
-void cvCvtLogitech9000Raw(IplImage* image, bool return_raw){
-	IplImage* raw_image = cvCreateImage(cvSize(image->width, image->height), IPL_DEPTH_8U, 1);
-	for(int r=0; r<image->height; r++){
-		uchar* image_data     = (uchar*)(image->imageData     + r*image->widthStep);
-		uchar* raw_image_data = (uchar*)(raw_image->imageData + r*raw_image->widthStep);
-		for(int c=0; c<image->width; c++)
-			raw_image_data[c] = uchar((255./1023.)*(image_data[3*c] + 256*image_data[3*c+1]));
-	}
-	if(return_raw)
-		cvMerge(raw_image, raw_image, raw_image, NULL, image);
-	else
-		cvCvtColor(raw_image, image, CV_BayerBG2BGR);
-	cvReleaseImage(&raw_image);
-}

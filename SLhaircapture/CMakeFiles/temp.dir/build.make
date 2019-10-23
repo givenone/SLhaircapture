@@ -129,11 +129,61 @@ CMakeFiles/temp.dir/cvStructuredLight.cpp.o.provides: CMakeFiles/temp.dir/cvStru
 CMakeFiles/temp.dir/cvStructuredLight.cpp.o.provides.build: CMakeFiles/temp.dir/cvStructuredLight.cpp.o
 
 
+CMakeFiles/temp.dir/cvCalibrateProCam.cpp.o: CMakeFiles/temp.dir/flags.make
+CMakeFiles/temp.dir/cvCalibrateProCam.cpp.o: cvCalibrateProCam.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/givenone/SLhaircapture/SLhaircapture/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/temp.dir/cvCalibrateProCam.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/temp.dir/cvCalibrateProCam.cpp.o -c /home/givenone/SLhaircapture/SLhaircapture/cvCalibrateProCam.cpp
+
+CMakeFiles/temp.dir/cvCalibrateProCam.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/temp.dir/cvCalibrateProCam.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/givenone/SLhaircapture/SLhaircapture/cvCalibrateProCam.cpp > CMakeFiles/temp.dir/cvCalibrateProCam.cpp.i
+
+CMakeFiles/temp.dir/cvCalibrateProCam.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/temp.dir/cvCalibrateProCam.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/givenone/SLhaircapture/SLhaircapture/cvCalibrateProCam.cpp -o CMakeFiles/temp.dir/cvCalibrateProCam.cpp.s
+
+CMakeFiles/temp.dir/cvCalibrateProCam.cpp.o.requires:
+
+.PHONY : CMakeFiles/temp.dir/cvCalibrateProCam.cpp.o.requires
+
+CMakeFiles/temp.dir/cvCalibrateProCam.cpp.o.provides: CMakeFiles/temp.dir/cvCalibrateProCam.cpp.o.requires
+	$(MAKE) -f CMakeFiles/temp.dir/build.make CMakeFiles/temp.dir/cvCalibrateProCam.cpp.o.provides.build
+.PHONY : CMakeFiles/temp.dir/cvCalibrateProCam.cpp.o.provides
+
+CMakeFiles/temp.dir/cvCalibrateProCam.cpp.o.provides.build: CMakeFiles/temp.dir/cvCalibrateProCam.cpp.o
+
+
+CMakeFiles/temp.dir/cvUtilProCam.cpp.o: CMakeFiles/temp.dir/flags.make
+CMakeFiles/temp.dir/cvUtilProCam.cpp.o: cvUtilProCam.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/givenone/SLhaircapture/SLhaircapture/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/temp.dir/cvUtilProCam.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/temp.dir/cvUtilProCam.cpp.o -c /home/givenone/SLhaircapture/SLhaircapture/cvUtilProCam.cpp
+
+CMakeFiles/temp.dir/cvUtilProCam.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/temp.dir/cvUtilProCam.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/givenone/SLhaircapture/SLhaircapture/cvUtilProCam.cpp > CMakeFiles/temp.dir/cvUtilProCam.cpp.i
+
+CMakeFiles/temp.dir/cvUtilProCam.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/temp.dir/cvUtilProCam.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/givenone/SLhaircapture/SLhaircapture/cvUtilProCam.cpp -o CMakeFiles/temp.dir/cvUtilProCam.cpp.s
+
+CMakeFiles/temp.dir/cvUtilProCam.cpp.o.requires:
+
+.PHONY : CMakeFiles/temp.dir/cvUtilProCam.cpp.o.requires
+
+CMakeFiles/temp.dir/cvUtilProCam.cpp.o.provides: CMakeFiles/temp.dir/cvUtilProCam.cpp.o.requires
+	$(MAKE) -f CMakeFiles/temp.dir/build.make CMakeFiles/temp.dir/cvUtilProCam.cpp.o.provides.build
+.PHONY : CMakeFiles/temp.dir/cvUtilProCam.cpp.o.provides
+
+CMakeFiles/temp.dir/cvUtilProCam.cpp.o.provides.build: CMakeFiles/temp.dir/cvUtilProCam.cpp.o
+
+
 # Object files for target temp
 temp_OBJECTS = \
 "CMakeFiles/temp.dir/stdafx.cpp.o" \
 "CMakeFiles/temp.dir/cvScanProCam.cpp.o" \
-"CMakeFiles/temp.dir/cvStructuredLight.cpp.o"
+"CMakeFiles/temp.dir/cvStructuredLight.cpp.o" \
+"CMakeFiles/temp.dir/cvCalibrateProCam.cpp.o" \
+"CMakeFiles/temp.dir/cvUtilProCam.cpp.o"
 
 # External object files for target temp
 temp_EXTERNAL_OBJECTS =
@@ -141,6 +191,8 @@ temp_EXTERNAL_OBJECTS =
 temp: CMakeFiles/temp.dir/stdafx.cpp.o
 temp: CMakeFiles/temp.dir/cvScanProCam.cpp.o
 temp: CMakeFiles/temp.dir/cvStructuredLight.cpp.o
+temp: CMakeFiles/temp.dir/cvCalibrateProCam.cpp.o
+temp: CMakeFiles/temp.dir/cvUtilProCam.cpp.o
 temp: CMakeFiles/temp.dir/build.make
 temp: /usr/local/lib/libopencv_stitching.so.3.4.0
 temp: /usr/local/lib/libopencv_superres.so.3.4.0
@@ -186,7 +238,7 @@ temp: /usr/local/lib/libopencv_objdetect.so.3.4.0
 temp: /usr/local/lib/libopencv_imgproc.so.3.4.0
 temp: /usr/local/lib/libopencv_core.so.3.4.0
 temp: CMakeFiles/temp.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/givenone/SLhaircapture/SLhaircapture/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX executable temp"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/givenone/SLhaircapture/SLhaircapture/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX executable temp"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/temp.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -197,6 +249,8 @@ CMakeFiles/temp.dir/build: temp
 CMakeFiles/temp.dir/requires: CMakeFiles/temp.dir/stdafx.cpp.o.requires
 CMakeFiles/temp.dir/requires: CMakeFiles/temp.dir/cvScanProCam.cpp.o.requires
 CMakeFiles/temp.dir/requires: CMakeFiles/temp.dir/cvStructuredLight.cpp.o.requires
+CMakeFiles/temp.dir/requires: CMakeFiles/temp.dir/cvCalibrateProCam.cpp.o.requires
+CMakeFiles/temp.dir/requires: CMakeFiles/temp.dir/cvUtilProCam.cpp.o.requires
 
 .PHONY : CMakeFiles/temp.dir/requires
 

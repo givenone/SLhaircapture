@@ -4,8 +4,10 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
+  "/home/givenone/SLhaircapture/SLhaircapture/cvCalibrateProCam.cpp" "/home/givenone/SLhaircapture/SLhaircapture/CMakeFiles/temp.dir/cvCalibrateProCam.cpp.o"
   "/home/givenone/SLhaircapture/SLhaircapture/cvScanProCam.cpp" "/home/givenone/SLhaircapture/SLhaircapture/CMakeFiles/temp.dir/cvScanProCam.cpp.o"
   "/home/givenone/SLhaircapture/SLhaircapture/cvStructuredLight.cpp" "/home/givenone/SLhaircapture/SLhaircapture/CMakeFiles/temp.dir/cvStructuredLight.cpp.o"
+  "/home/givenone/SLhaircapture/SLhaircapture/cvUtilProCam.cpp" "/home/givenone/SLhaircapture/SLhaircapture/CMakeFiles/temp.dir/cvUtilProCam.cpp.o"
   "/home/givenone/SLhaircapture/SLhaircapture/stdafx.cpp" "/home/givenone/SLhaircapture/SLhaircapture/CMakeFiles/temp.dir/stdafx.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")

@@ -123,6 +123,33 @@ temp/fast:
 	$(MAKE) -f CMakeFiles/temp.dir/build.make CMakeFiles/temp.dir/build
 .PHONY : temp/fast
 
+cvCalibrateProCam.o: cvCalibrateProCam.cpp.o
+
+.PHONY : cvCalibrateProCam.o
+
+# target to build an object file
+cvCalibrateProCam.cpp.o:
+	$(MAKE) -f CMakeFiles/temp.dir/build.make CMakeFiles/temp.dir/cvCalibrateProCam.cpp.o
+.PHONY : cvCalibrateProCam.cpp.o
+
+cvCalibrateProCam.i: cvCalibrateProCam.cpp.i
+
+.PHONY : cvCalibrateProCam.i
+
+# target to preprocess a source file
+cvCalibrateProCam.cpp.i:
+	$(MAKE) -f CMakeFiles/temp.dir/build.make CMakeFiles/temp.dir/cvCalibrateProCam.cpp.i
+.PHONY : cvCalibrateProCam.cpp.i
+
+cvCalibrateProCam.s: cvCalibrateProCam.cpp.s
+
+.PHONY : cvCalibrateProCam.s
+
+# target to generate assembly for a file
+cvCalibrateProCam.cpp.s:
+	$(MAKE) -f CMakeFiles/temp.dir/build.make CMakeFiles/temp.dir/cvCalibrateProCam.cpp.s
+.PHONY : cvCalibrateProCam.cpp.s
+
 cvScanProCam.o: cvScanProCam.cpp.o
 
 .PHONY : cvScanProCam.o
@@ -177,6 +204,33 @@ cvStructuredLight.cpp.s:
 	$(MAKE) -f CMakeFiles/temp.dir/build.make CMakeFiles/temp.dir/cvStructuredLight.cpp.s
 .PHONY : cvStructuredLight.cpp.s
 
+cvUtilProCam.o: cvUtilProCam.cpp.o
+
+.PHONY : cvUtilProCam.o
+
+# target to build an object file
+cvUtilProCam.cpp.o:
+	$(MAKE) -f CMakeFiles/temp.dir/build.make CMakeFiles/temp.dir/cvUtilProCam.cpp.o
+.PHONY : cvUtilProCam.cpp.o
+
+cvUtilProCam.i: cvUtilProCam.cpp.i
+
+.PHONY : cvUtilProCam.i
+
+# target to preprocess a source file
+cvUtilProCam.cpp.i:
+	$(MAKE) -f CMakeFiles/temp.dir/build.make CMakeFiles/temp.dir/cvUtilProCam.cpp.i
+.PHONY : cvUtilProCam.cpp.i
+
+cvUtilProCam.s: cvUtilProCam.cpp.s
+
+.PHONY : cvUtilProCam.s
+
+# target to generate assembly for a file
+cvUtilProCam.cpp.s:
+	$(MAKE) -f CMakeFiles/temp.dir/build.make CMakeFiles/temp.dir/cvUtilProCam.cpp.s
+.PHONY : cvUtilProCam.cpp.s
+
 stdafx.o: stdafx.cpp.o
 
 .PHONY : stdafx.o
@@ -213,12 +267,18 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... temp"
 	@echo "... edit_cache"
+	@echo "... cvCalibrateProCam.o"
+	@echo "... cvCalibrateProCam.i"
+	@echo "... cvCalibrateProCam.s"
 	@echo "... cvScanProCam.o"
 	@echo "... cvScanProCam.i"
 	@echo "... cvScanProCam.s"
 	@echo "... cvStructuredLight.o"
 	@echo "... cvStructuredLight.i"
 	@echo "... cvStructuredLight.s"
+	@echo "... cvUtilProCam.o"
+	@echo "... cvUtilProCam.i"
+	@echo "... cvUtilProCam.s"
 	@echo "... stdafx.o"
 	@echo "... stdafx.i"
 	@echo "... stdafx.s"
