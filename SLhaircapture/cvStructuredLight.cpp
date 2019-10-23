@@ -1,13 +1,8 @@
 // this file include main function
-
-
-
-
 #include "stdafx.h"
 #include "cvStructuredLight.hpp"
-//#include "cvCalibrateProCam.h"
 #include "cvScanProCam.h"
-//#include "cvUtilProCam.h"
+#include "cvUtilProCam.h"
 
 #include <sys/stat.h>
 
@@ -23,13 +18,11 @@ int main(int argc, char* argv[])
 	int gray_ncols, gray_nrows;
 	int gray_colshift, gray_rowshift;
 
-	int width = 800;
-	int height = 600;
+	int width = 800; int height = 600;
 	generateGrayCodes(width /*sl_params->proj_w*/, height /*sl_params->proj_h*/, proj_gray_codes, 
 		gray_ncols, gray_nrows, gray_colshift, gray_rowshift, 
 		true /*sl_params->scan_cols*/, true /*sl_params->scan_rows*/);
 
-	cout << gray_ncols << gray_nrows << endl;
 	char dir[100], buf[100], buf2[1000];
 	sprintf(dir, "%d x %d", width, height);
 	mkdir(dir, 0776);
@@ -43,11 +36,11 @@ int main(int argc, char* argv[])
 
 	delete[] proj_gray_codes;
 
-	IplImage** proj_gray_codes_S = NULL;
-	generateGrayCodes_S(width /*sl_params->proj_w*/, height /*sl_params->proj_h*/, proj_gray_codes_S, 
-		gray_ncols, gray_nrows, gray_colshift, gray_rowshift, 
-		true /*sl_params->scan_cols*/, true /*sl_params->scan_rows*/);
-
+//	IplImage** proj_gray_codes_S = NULL;
+//	generateGrayCodes_S(width /*sl_params->proj_w*/, height /*sl_params->proj_h*/, proj_gray_codes_S, 
+//		gray_ncols, gray_nrows, gray_colshift, gray_rowshift, 
+//		true /*sl_params->scan_cols*/, true /*sl_params->scan_rows*/);
+/*
 	sprintf(dir, "%d x %d : shifting", width, height);
 	mkdir(dir, 0776);
 
@@ -59,7 +52,128 @@ int main(int argc, char* argv[])
 	}
 
 	delete[] proj_gray_codes;
+*/
+
+	// input calibration
+
+	struct slParams sl_params; //	configuration
+	struct slCalib sl_calib; //	calibration
 	
+	readConfiguration(NULL, &sl_params);
+	
+		// Allocate storage for calibration parameters.
+	
+	int cam_nelems                  = sl_params.cam_w*sl_params.cam_h;
+	int proj_nelems                 = sl_params.proj_w*sl_params.proj_h;
+    sl_calib.cam_intrinsic_calib    = false;
+	sl_calib.proj_intrinsic_calib   = false;
+	sl_calib.procam_extrinsic_calib = false;
+	sl_calib.cam_intrinsic          = cvCreateMat(3,3,CV_32FC1);
+	sl_calib.cam_distortion         = cvCreateMat(5,1,CV_32FC1);
+	sl_calib.cam_extrinsic          = cvCreateMat(2, 3, CV_32FC1);
+	sl_calib.proj_intrinsic         = cvCreateMat(3, 3, CV_32FC1);
+	sl_calib.proj_distortion        = cvCreateMat(5, 1, CV_32FC1);
+	sl_calib.proj_extrinsic         = cvCreateMat(2, 3, CV_32FC1);
+	sl_calib.cam_center             = cvCreateMat(3, 1, CV_32FC1);
+	sl_calib.proj_center            = cvCreateMat(3, 1, CV_32FC1);
+	sl_calib.cam_rays               = cvCreateMat(3, cam_nelems, CV_32FC1);
+	sl_calib.proj_rays              = cvCreateMat(3, proj_nelems, CV_32FC1);
+	sl_calib.proj_column_planes     = cvCreateMat(sl_params.proj_w, 4, CV_32FC1);
+	sl_calib.proj_row_planes        = cvCreateMat(sl_params.proj_h, 4, CV_32FC1);
+/*
+** 프로젝터가 원점 ! -> no extrinsic value
+
+Camera Calib:
+
+- reprojection error: 2.12458
+
+- Intrinsic Param:
+
+[6799.891745995248, 0, 1684.663925292664;
+
+0, 6819.065266606978, 897.2080419838242;
+
+0, 0, 1]
+
+- distance Coefficients: [-0.1081234940885747, 1.019777262201034, -0.01496156727613678, 0.007012687213256888, 0]
+
+Extrinsic Param:
+
+- reprojection error: 1.7807
+
+- R:
+
+[-0.9465088474336322, -0.02181055404986991, -0.3219399034942621;
+
+0.03029318697689328, -0.9993127627683679, -0.02136176469851316;
+
+-0.3212527424826753, -0.0299716849758128, 0.9465190825055085]
+
+- T:
+
+[208.4992551331917;
+
+-9.241636763329311;
+
+63.17988709955341]
+
+Projector Calib:
+
+- reprojection error: 0.553558
+
+- Intrinsic Param:
+
+[1583.136672775252, 0, 516.2688867516777;
+
+0, 2105.254975139322, 519.7798700367449;
+
+0, 0, 1]
+
+- distance Coefficients: [0.04757942626277912, -0.4940169148610814, 0.01733058285795064, 0.01007747086733519, 0]
+
+*/
+	// Initialize background model.
+
+	sl_calib.background_depth_map = cvCreateMat(sl_params.cam_h, sl_params.cam_w, CV_32FC1);
+	sl_calib.background_image     = cvCreateImage(cvSize(sl_params.cam_w, sl_params.cam_h), IPL_DEPTH_8U, 3);
+	sl_calib.background_mask      = cvCreateImage(cvSize(sl_params.cam_w, sl_params.cam_h), IPL_DEPTH_8U, 1);
+	cvSet(sl_calib.background_depth_map, cvScalar(FLT_MAX));
+	cvZero(sl_calib.background_image);
+	cvSet(sl_calib.background_mask, cvScalar(255));
+
+
+	// read imange
+
+	IplImage** cam_gray_codes = NULL;
+	cam_gray_codes = new IplImage* [2*(gray_ncols+gray_nrows+1)];
+	for(int i=0; i<2*(gray_ncols+gray_nrows+1); i++)
+		cam_gray_codes[i] = NULL; //// TODO : read png files & need to modify array size
+
+
+	// Decode gray codes
+
+	IplImage* gray_decoded_cols = cvCreateImage(cvSize(sl_params.cam_w, sl_params.cam_h), IPL_DEPTH_16U, 1);
+	IplImage* gray_decoded_rows = cvCreateImage(cvSize(sl_params.cam_w, sl_params.cam_h), IPL_DEPTH_16U, 1);
+	IplImage* gray_mask /* what is this ? */ = cvCreateImage(cvSize(sl_params.cam_w, sl_params.cam_h), IPL_DEPTH_8U,  1);
+	decodeGrayCodes(sl_params.proj_w, sl_params.proj_h,
+					cam_gray_codes /* image read by camera */, 
+					gray_decoded_cols, gray_decoded_rows, gray_mask,
+					gray_ncols, gray_nrows, 
+					gray_colshift, gray_rowshift, 
+					sl_params.thresh);
+	
+	// reconstruction
+
+	printf("Reconstructing the point cloud and the depth map...\n");
+	CvMat *points  = cvCreateMat(3, sl_params.cam_h*sl_params.cam_w, CV_32FC1);
+	CvMat *colors  = cvCreateMat(3, sl_params.cam_h*sl_params.cam_w, CV_32FC1);
+	CvMat *mask    = cvCreateMat(1, sl_params.cam_h*sl_params.cam_w, CV_32FC1);
+	reconstructStructuredLight(sl_params, sl_calib, 
+							   cam_gray_codes[0],
+		                       gray_decoded_cols, gray_decoded_rows, sl_calib.background_mask,
+							   points, colors, sl_calib.background_depth_map, mask);
+
+
 /*	// Parse command line arguments.
 	printf("[Structured Lighting for 3D Scanning]\n");
 	char configFile[1024];

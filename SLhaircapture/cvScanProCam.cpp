@@ -186,4 +186,266 @@ int generateGrayCodes_S(int width, int height,
 	return 0;
 }
 
-// can find other functions in "tutorial" 
+// Decode Gray codes.
+int decodeGrayCodes(int proj_width, int proj_height,
+					IplImage**& gray_codes /* by cammera */, 
+					IplImage*& decoded_cols,
+					IplImage*& decoded_rows,
+					IplImage*& mask,
+					int& n_cols, int& n_rows,
+					int& col_shift, int& row_shift, 
+					int sl_thresh){
+
+	// Extract width and height of images.
+	int cam_width  = gray_codes[0]->width;
+	int cam_height = gray_codes[0]->height;
+
+	// Allocate temporary variables.
+	IplImage* gray_1      = cvCreateImage(cvSize(cam_width, cam_height), IPL_DEPTH_8U,  1);
+	IplImage* gray_2      = cvCreateImage(cvSize(cam_width, cam_height), IPL_DEPTH_8U,  1);
+	IplImage* bit_plane_1 = cvCreateImage(cvSize(cam_width, cam_height), IPL_DEPTH_8U,  1);
+	IplImage* bit_plane_2 = cvCreateImage(cvSize(cam_width, cam_height), IPL_DEPTH_8U,  1);
+	IplImage* temp        = cvCreateImage(cvSize(cam_width, cam_height), IPL_DEPTH_8U,  1);
+
+	// Initialize image mask (indicates reconstructed pixels).
+	cvSet(mask, cvScalar(0));
+
+	// Decode Gray codes for projector columns.
+	cvZero(decoded_cols);
+	for(int i=0; i<n_cols; i++){
+
+		// Decode bit-plane and update mask.
+		cvCvtColor(gray_codes[2*(i+1)],   gray_1, CV_RGB2GRAY);
+		cvCvtColor(gray_codes[2*(i+1)+1], gray_2, CV_RGB2GRAY);
+		cvAbsDiff(gray_1, gray_2, temp);
+		cvCmpS(temp, sl_thresh, temp, CV_CMP_GE);
+		/* 차이를 temp에 저장하고 temp가 threshold보다 높은 지 판단  -> mask에는 해당하는 것들만 masking 된다*/
+		cvOr(temp, mask, mask);
+
+		cvCmp(gray_1, gray_2, bit_plane_2, CV_CMP_GE);
+		/* raw difference는 bit_plane에 저장 */
+
+		// Convert from gray code to decimal value.
+		if(i>0)
+			cvXor(bit_plane_1, bit_plane_2, bit_plane_1);
+		else
+			cvCopyImage(bit_plane_2, bit_plane_1);
+		cvAddS(decoded_cols, cvScalar(pow(2.0,n_cols-i-1)), decoded_cols, bit_plane_1);
+	}
+	cvSubS(decoded_cols, cvScalar(col_shift), decoded_cols);
+
+	// Decode Gray codes for projector rows.
+	cvZero(decoded_rows);
+	for(int i=0; i<n_rows; i++){
+
+		// Decode bit-plane and update mask.
+		cvCvtColor(gray_codes[2*(i+n_cols+1)],   gray_1, CV_RGB2GRAY);
+		cvCvtColor(gray_codes[2*(i+n_cols+1)+1], gray_2, CV_RGB2GRAY);
+		cvAbsDiff(gray_1, gray_2, temp);
+		cvCmpS(temp, sl_thresh, temp, CV_CMP_GE);
+		cvOr(temp, mask, mask);
+		cvCmp(gray_1, gray_2, bit_plane_2, CV_CMP_GE);
+
+		// Convert from gray code to decimal value.
+		if(i>0)
+			cvXor(bit_plane_1, bit_plane_2, bit_plane_1);
+		else
+			cvCopyImage(bit_plane_2, bit_plane_1);
+		cvAddS(decoded_rows, cvScalar(pow(2.0,n_rows-i-1)), decoded_rows, bit_plane_1);
+	}
+	cvSubS(decoded_rows, cvScalar(row_shift), decoded_rows);
+
+	// Eliminate invalid column/row estimates.
+    // Note: This will exclude pixels if either the column or row is missing or erroneous.
+	cvCmpS(decoded_cols, proj_width-1,  temp, CV_CMP_LE);
+	cvAnd(temp, mask, mask);
+	cvCmpS(decoded_cols, 0,  temp, CV_CMP_GE);
+	cvAnd(temp, mask, mask);
+	cvCmpS(decoded_rows, proj_height-1, temp, CV_CMP_LE);
+	cvAnd(temp, mask, mask);
+	cvCmpS(decoded_rows, 0,  temp, CV_CMP_GE);
+	cvAnd(temp, mask, mask);
+	cvNot(mask, temp);
+	cvSet(decoded_cols, cvScalar(NULL), temp);
+	cvSet(decoded_rows, cvScalar(NULL), temp);
+
+	// Free allocated resources.
+	cvReleaseImage(&gray_1);
+	cvReleaseImage(&gray_2);
+	cvReleaseImage(&bit_plane_1);
+	cvReleaseImage(&bit_plane_2);
+	cvReleaseImage(&temp);
+
+	// Return without errors.
+	return 0;
+}
+
+// Reconstruct the point cloud and the depth map from a structured light sequence.
+int reconstructStructuredLight(struct slParams* sl_params, 
+					           struct slCalib* sl_calib,
+							   IplImage*& texture_image,
+							   IplImage*& gray_decoded_cols, 
+							   IplImage*& gray_decoded_rows, 
+						       IplImage*& gray_mask,
+							   CvMat*&    points,
+							   CvMat*&    colors,
+							   CvMat*&    depth_map,
+							   CvMat*&    mask){
+	/* depth map, colors, point, mask를 만들어내는 함수 */
+
+	// Define pointers to various image data elements (for fast pixel access).
+	int cam_nelems                 = sl_params->cam_w*sl_params->cam_h;
+	int proj_nelems                = sl_params->proj_w*sl_params->proj_h;
+	uchar*  background_mask_data   = (uchar*)sl_calib->background_mask->imageData;
+	int     background_mask_step   = sl_calib->background_mask->widthStep/sizeof(uchar);
+	uchar*  gray_mask_data         = (uchar*)gray_mask->imageData;
+	int     gray_mask_step         = gray_mask->widthStep/sizeof(uchar);
+	ushort* gray_decoded_cols_data = (ushort*)gray_decoded_cols->imageData;
+	int     gray_decoded_cols_step = gray_decoded_cols->widthStep/sizeof(ushort);
+	ushort* gray_decoded_rows_data = (ushort*)gray_decoded_rows->imageData;
+	int     gray_decoded_rows_step = gray_decoded_rows->widthStep/sizeof(ushort);
+
+	// Create a temporary copy of the background depth map.
+	CvMat* background_depth_map = cvCloneMat(sl_calib->background_depth_map);
+
+	// By default, disable all pixels. -> mask가 0일 때는 disable 상태임.
+	cvZero(mask);
+
+	// Reconstruct point cloud and depth map.
+	for(int r=0; r<sl_params->cam_h; r++){
+		for(int c=0; c<sl_params->cam_w; c++){
+
+			// Reconstruct current point, if mask is non-zero.
+			if(gray_mask_data[r*gray_mask_step+c]){
+
+				// Reconstruct using either "ray-plane" or "ray-ray" triangulation.
+				if(sl_params->mode == 1){
+
+					// Allocate storage for row/column reconstructed points and depths.
+					float point_cols[3], point_rows[3];
+					float depth_cols, depth_rows;
+				
+					// Intersect camera ray with corresponding projector column.
+					if(sl_params->scan_cols){
+						float q[3], v[3], w[4];
+						int rc = (sl_params->cam_w)*r+c;
+						for(int i=0; i<3; i++){
+							q[i] = sl_calib->cam_center->data.fl[i];
+							v[i] = sl_calib->cam_rays->data.fl[rc+cam_nelems*i];
+						}
+						int corresponding_column = gray_decoded_cols_data[r*gray_decoded_cols_step+c];
+						for(int i=0; i<4; i++)
+							w[i] = sl_calib->proj_column_planes->data.fl[4*corresponding_column+i];
+						intersectLineWithPlane3D(q, v, w, point_cols, depth_cols);
+					}
+					// point와 depth를 triangulation을 이용하여 계산. point는 만나는 점의 위치고, depth는 float 값.
+
+					// Intersect camera ray with corresponding projector row.
+					if(sl_params->scan_rows){
+						float q[3], v[3], w[4];
+						int rc = (sl_params->cam_w)*r+c;
+						for(int i=0; i<3; i++){
+							q[i] = sl_calib->cam_center->data.fl[i];
+							v[i] = sl_calib->cam_rays->data.fl[rc+cam_nelems*i];
+						}
+						int corresponding_row = gray_decoded_rows_data[r*gray_decoded_rows_step+c];
+						for(int i=0; i<4; i++)
+							w[i] = sl_calib->proj_row_planes->data.fl[4*corresponding_row+i];
+						intersectLineWithPlane3D(q, v, w, point_rows, depth_rows);
+					}
+
+					// Average points of intersection (if row and column scanning are both enabled).
+					// Note: Eliminate any points that differ between row and column reconstructions.
+					if( sl_params->scan_cols && sl_params->scan_rows){
+						if(abs(depth_cols-depth_rows) < sl_params->dist_reject){
+							depth_map->data.fl[sl_params->cam_w*r+c] = (depth_cols+depth_rows)/2;
+							for(int i=0; i<3; i++)
+								points->data.fl[sl_params->cam_w*r+c+cam_nelems*i] = (point_cols[i]+point_rows[i])/2;
+						}
+						else
+							gray_mask_data[r*gray_mask_step+c] = 0;
+					}
+					else if(sl_params->scan_cols){
+						depth_map->data.fl[sl_params->cam_w*r+c] = depth_cols;
+						for(int i=0; i<3; i++)
+							points->data.fl[sl_params->cam_w*r+c+cam_nelems*i] = point_cols[i];
+					}
+					else if(sl_params->scan_rows){
+						depth_map->data.fl[sl_params->cam_w*r+c] = depth_rows;
+						for(int i=0; i<3; i++)
+							points->data.fl[sl_params->cam_w*r+c+cam_nelems*i] = point_rows[i];
+					}
+					else
+						gray_mask_data[r*gray_mask_step+c] = 0;
+				}
+				else{
+
+					// Reconstruct surface using "ray-ray" triangulation.
+					int corresponding_column = gray_decoded_cols_data[r*gray_decoded_cols_step+c];
+					int corresponding_row    = gray_decoded_rows_data[r*gray_decoded_rows_step+c];
+					float q1[3], q2[3], v1[3], v2[3], point[3], depth = 0;
+					int rc_cam  = (sl_params->cam_w)*r+c;
+					int rc_proj = (sl_params->proj_w)*corresponding_row+corresponding_column;
+					for(int i=0; i<3; i++){
+						q1[i] = sl_calib->cam_center->data.fl[i];
+						q2[i] = sl_calib->proj_center->data.fl[i];
+						v1[i] = sl_calib->cam_rays->data.fl[rc_cam+cam_nelems*i];
+						v2[i] = sl_calib->proj_rays->data.fl[rc_proj+proj_nelems*i];
+					}
+					intersectLineWithLine3D(q1, v1, q2, v2, point);
+					for(int i=0; i<3; i++)
+						depth += v1[i]*(point[i]-q1[i]);
+					depth_map->data.fl[rc_cam] = depth;
+					for(int i=0; i<3; i++)
+						points->data.fl[rc_cam+cam_nelems*i] = point[i];
+				}
+
+				// Assign color using provided texture image.
+				// Note: Color channels are ordered as RGB, rather than OpenCV's default BGR.
+				uchar* texture_image_data = (uchar*)(texture_image->imageData + r*texture_image->widthStep);
+				for(int i=0; i<3; i++)
+					colors->data.fl[sl_params->cam_w*r+c+cam_nelems*i] = (float)texture_image_data[3*c+(2-i)]/(float)255.0;
+
+				// Update valid pixel mask (e.g., points will only be saved if valid).
+				mask->data.fl[sl_params->cam_w*r+c] = 1;
+
+				// Reject any points outside near/far clipping planes.
+				// clipping plane들이 뭐지?
+				if(depth_map->data.fl[sl_params->cam_w*r+c] < sl_params->dist_range[0] ||
+				   depth_map->data.fl[sl_params->cam_w*r+c] > sl_params->dist_range[1]){
+					gray_mask_data[r*gray_mask_step+c] = 0;
+					mask->data.fl[sl_params->cam_w*r+c] = 0;
+					depth_map->data.fl[sl_params->cam_w*r+c] = 0;
+					for(int i=0; i<3; i++)
+						points->data.fl[sl_params->cam_w*r+c+cam_nelems*i] = 0;
+					for(int i=0; i<3; i++)
+						colors->data.fl[sl_params->cam_w*r+c+cam_nelems*i] = 0;
+				}
+
+				// Reject background points.
+				// Note: Currently only uses depth to determine foreground vs. background pixels.
+				float depth_difference = 
+					background_depth_map->data.fl[sl_params->cam_w*r+c] - 
+					depth_map->data.fl[sl_params->cam_w*r+c];
+				if(depth_difference < sl_params->background_depth_thresh && 
+				   gray_mask_data[r*gray_mask_step+c] && 
+				   background_mask_data[r*background_mask_step+c]){
+					gray_mask_data[r*gray_mask_step+c] = 0;
+					mask->data.fl[sl_params->cam_w*r+c] = 0;
+					depth_map->data.fl[sl_params->cam_w*r+c] = 0;
+					for(int i=0; i<3; i++)
+						points->data.fl[sl_params->cam_w*r+c+cam_nelems*i] = 0;
+					for(int i=0; i<3; i++)
+						colors->data.fl[sl_params->cam_w*r+c+cam_nelems*i] = 0;
+				}
+			}
+		}
+	}
+
+	// Release allocated resources.
+	cvReleaseMat(&background_depth_map);
+
+	// Return without errors.
+	return 0;
+}
+
