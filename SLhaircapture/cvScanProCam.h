@@ -34,3 +34,14 @@ int decodeGrayCodes(int proj_width, int proj_height, IplImage**& gray_codes /* b
 int generateGrayCodes(int width, int height, IplImage**& gray_codes, int& n_cols, int& n_rows, int& col_shift, int& row_shift, bool sl_scan_cols, bool sl_scan_rows);
 
 int generateGrayCodes_S(int width, int height, IplImage**& gray_codes, int& n_cols, int& n_rows, int& col_shift, int& row_shift, bool sl_scan_cols, bool sl_scan_rows);
+
+int reconstructStructuredLight(struct slParams* sl_params, 
+					           struct slCalib* sl_calib,
+							   IplImage*& texture_image,
+							   IplImage*& gray_decoded_cols, 
+							   IplImage*& gray_decoded_rows, 
+						       IplImage*& gray_mask,
+							   CvMat*&    points,
+							   CvMat*&    colors,
+							   CvMat*&    depth_map,
+							   CvMat*&    mask);

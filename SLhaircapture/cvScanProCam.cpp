@@ -27,7 +27,7 @@
 #include "stdafx.h"
 #include "cvStructuredLight.hpp"
 #include "cvScanProCam.h"
-//#include "cvUtilProCam.h"
+#include "cvUtilProCam.h"
 
 // Generate Gray codes.
 int generateGrayCodes(int width, int height, 

@@ -144,11 +144,13 @@ Projector Calib:
 
 	// read imange
 
-	IplImage** cam_gray_codes = NULL;
+	IplImage** cam_gray_codes = NULL; char temp [100];
 	cam_gray_codes = new IplImage* [2*(gray_ncols+gray_nrows+1)];
 	for(int i=0; i<2*(gray_ncols+gray_nrows+1); i++)
-		cam_gray_codes[i] = NULL; //// TODO : read png files & need to modify array size
-
+	{
+		sprintf(temp, "./Face_6mp_01/800x600/%02d.png", i);
+		cam_gray_codes[i] = cvLoadImage(temp)); //// TODO : read png files & need to modify array size
+	}		
 
 	// Decode gray codes
 
