@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
 	
 	readConfiguration(NULL, &sl_params);	
 		// Allocate storage for calibration parameters.
-	
+
 	int cam_nelems                  = sl_params.cam_w*sl_params.cam_h;
 	int proj_nelems                 = sl_params.proj_w*sl_params.proj_h;
     sl_calib.cam_intrinsic_calib    = true;
@@ -124,9 +124,13 @@ int main(int argc, char* argv[])
 	cvReleaseMat(&t);
 	cvReleaseMat(&R);
 
+
+	cout << "read configuration" << endl;
 	// precalcuate using calibration data
 
 	evaluateProCamGeometry(&sl_params, &sl_calib); 
+
+	cout << "evaluated Projector Camera Geometry" << endl;
 /*
 	프로젝터가 원점 ! -> no extrinsic value
 */
@@ -139,6 +143,7 @@ int main(int argc, char* argv[])
 	cvZero(sl_calib.background_image);
 	cvSet(sl_calib.background_mask, cvScalar(255));
 
+	cout << "Initialized Background Model" << endl;
 
 	// read imange
 
@@ -149,6 +154,8 @@ int main(int argc, char* argv[])
 		sprintf(temp, "./Face_6mp_01/800x600/%02d.png", i);
 		cam_gray_codes[i] = cvLoadImage(temp); //// TODO : read png files & need to modify array size
 	}		
+
+	cout << "Successfully read all images" << endl;
 
 	// Decode gray codes
 
@@ -163,6 +170,7 @@ int main(int argc, char* argv[])
 					sl_params.thresh);
 	
 	// display result
+	cout << "Succesfully decoded gray codes" << endl;
 
 //	displayDecodingResults(gray_decoded_cols, gray_decoded_rows, gray_mask, sl_params);
 
@@ -178,6 +186,7 @@ int main(int argc, char* argv[])
 		                       gray_decoded_cols, gray_decoded_rows, gray_mask,
 							   points, colors, depth_map, mask);
 
+	cout << "finished reconstruction !" << endl;
 	// display depth map
 //	displayDepthMap(depth_map, gray_mask, &sl_params);
 
