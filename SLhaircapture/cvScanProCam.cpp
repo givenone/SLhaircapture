@@ -200,30 +200,36 @@ int decodeGrayCodes(int proj_width, int proj_height,
 	int cam_width  = gray_codes[0]->width;
 	int cam_height = gray_codes[0]->height;
 
+	cout << "cam_width : " << cam_width << endl << "cam_height : " << cam_height << endl;
+
 	// Allocate temporary variables.
 	IplImage* gray_1      = cvCreateImage(cvSize(cam_width, cam_height), IPL_DEPTH_8U,  1);
 	IplImage* gray_2      = cvCreateImage(cvSize(cam_width, cam_height), IPL_DEPTH_8U,  1);
 	IplImage* bit_plane_1 = cvCreateImage(cvSize(cam_width, cam_height), IPL_DEPTH_8U,  1);
 	IplImage* bit_plane_2 = cvCreateImage(cvSize(cam_width, cam_height), IPL_DEPTH_8U,  1);
 	IplImage* temp        = cvCreateImage(cvSize(cam_width, cam_height), IPL_DEPTH_8U,  1);
+	IplImage* thresh_hold = cvCreateImage(cvSize(cam_width, cam_height), IPL_DEPTH_8U,  1);
 
 	// Initialize image mask (indicates reconstructed pixels).
 	cvSet(mask, cvScalar(0));
+
+	cvCvtColor(gray_codes[0], gray_1, CV_RGB2GRAY);
+	cvCvtColor(gray_codes[1], gray_2, CV_RGB2GRAY);
+
+	cvAbsDiff(gray_1, gray_2, temp);
+	cvCmpS(temp, sl_thresh, temp, CV_CMP_GE);
+	cvOr(temp, mask, mask);
+
+	cvAdd(gray_1, gray_2, thresh_hold);
+	thresh_hold = thresh_hold / 2; // mean of 2 images.
 
 	// Decode Gray codes for projector columns.
 	cvZero(decoded_cols);
 	for(int i=0; i<n_cols; i++){
 
 		// Decode bit-plane and update mask.
-		cvCvtColor(gray_codes[2*(i+1)],   gray_1, CV_RGB2GRAY);
-		cvCvtColor(gray_codes[2*(i+1)+1], gray_2, CV_RGB2GRAY);
-		cvAbsDiff(gray_1, gray_2, temp);
-		cvCmpS(temp, sl_thresh, temp, CV_CMP_GE);
-		/* 차이를 temp에 저장하고 temp가 threshold보다 높은 지 판단  -> mask에는 해당하는 것들만 masking 된다*/
-		cvOr(temp, mask, mask);
-
-		cvCmp(gray_1, gray_2, bit_plane_2, CV_CMP_GE);
-		/* raw difference는 bit_plane에 저장 */
+		cvCvtColor(gray_codes[i+2],   gray_1, CV_RGB2GRAY);
+		cvCmp(gray_1, thresh_hold, bit_plane_2, CV_CMP_GE);
 
 		// Convert from gray code to decimal value.
 		if(i>0)
@@ -239,12 +245,8 @@ int decodeGrayCodes(int proj_width, int proj_height,
 	for(int i=0; i<n_rows; i++){
 
 		// Decode bit-plane and update mask.
-		cvCvtColor(gray_codes[2*(i+n_cols+1)],   gray_1, CV_RGB2GRAY);
-		cvCvtColor(gray_codes[2*(i+n_cols+1)+1], gray_2, CV_RGB2GRAY);
-		cvAbsDiff(gray_1, gray_2, temp);
-		cvCmpS(temp, sl_thresh, temp, CV_CMP_GE);
-		cvOr(temp, mask, mask);
-		cvCmp(gray_1, gray_2, bit_plane_2, CV_CMP_GE);
+		cvCvtColor(gray_codes[2+n_cols+i], gray_1, CV_RGB2GRAY);
+		cvCmp(gray_1, thresh_hold, bit_plane_2, CV_CMP_GE);
 
 		// Convert from gray code to decimal value.
 		if(i>0)
@@ -275,7 +277,7 @@ int decodeGrayCodes(int proj_width, int proj_height,
 	cvReleaseImage(&bit_plane_1);
 	cvReleaseImage(&bit_plane_2);
 	cvReleaseImage(&temp);
-
+	cvReleaseImage(&thresh_hold);
 	// Return without errors.
 	return 0;
 }

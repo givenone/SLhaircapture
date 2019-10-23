@@ -245,12 +245,12 @@ void readConfiguration(const char* filename, struct slParams* sl_params){
 	// Read projector parameters.
 	sl_params->proj_w      = 800;
 	sl_params->proj_h      = 600;
-/*	sl_params->proj_invert = false;
+//	sl_params->proj_invert = false;
 
 	// Read camera and projector gain parameters.
-	sl_params->cam_gain  = cvReadIntByName(fs, m, "camera_gain",     50);
-	sl_params->proj_gain = cvReadIntByName(fs, m, "projector_gain",  50);
-	
+	sl_params->cam_gain  = 50;//cvReadIntByName(fs, m, "camera_gain",     50);
+	sl_params->proj_gain = 50;//cvReadIntByName(fs, m, "projector_gain",  50);
+/*	
 	// Read distortion model parameters.
 	m = cvGetFileNodeByName(fs, 0, "distortion_model");
 	sl_params->cam_dist_model[0]  = (cvReadIntByName(fs, m, "enable_tangential_camera",          0) != 0);
@@ -264,19 +264,18 @@ void readConfiguration(const char* filename, struct slParams* sl_params){
 	sl_params->cam_board_h    =        cvReadIntByName(fs,  m, "interior_vertical_corners",      6);
 	sl_params->cam_board_w_mm = (float)cvReadRealByName(fs, m, "square_width_mm",             30.0);
 	sl_params->cam_board_h_mm = (float)cvReadRealByName(fs, m, "square_height_mm",            30.0);
-	
+*/	
 	// Read scanning and reconstruction parameters.
-	m = cvGetFileNodeByName(fs, 0, "scanning_and_reconstruction");
-	sl_params->mode                    =         cvReadIntByName(fs,  m, "mode",                               2);
-	sl_params->scan_cols               =        (cvReadIntByName(fs,  m, "reconstruct_columns",                1) != 0);
-	sl_params->scan_rows               =        (cvReadIntByName(fs,  m, "reconstruct_rows",                   1) != 0);
+	sl_params->mode                    =  2;      // cvReadIntByName(fs,  m, "mode",                               2);
+	sl_params->scan_cols               =  true; //      (cvReadIntByName(fs,  m, "reconstruct_columns",                1) != 0);
+	sl_params->scan_rows               =  true; //      (cvReadIntByName(fs,  m, "reconstruct_rows",                   1) != 0);
 
-	sl_params->thresh                  =         cvReadIntByName(fs,  m, "minimum_contrast_threshold",        32);
-*/
-	sl_params->dist_range[0]           = (float) cvReadRealByName(fs, m, "minimum_distance_mm",              0.0);
-	sl_params->dist_range[1]           = (float) cvReadRealByName(fs, m, "maximum_distance_mm",            1.0e4);
-	sl_params->dist_reject             = (float) cvReadRealByName(fs, m, "maximum_distance_variation_mm",   10.0);
-	sl_params->background_depth_thresh = (float) cvReadRealByName(fs, m, "minimum_background_distance_mm",  20.0);
+	sl_params->thresh                  = 32;
+
+	sl_params->dist_range[0]           = (float) 0.0; //cvReadRealByName(fs, m, "minimum_distance_mm",              0.0);
+	sl_params->dist_range[1]           = (float) 1.0e4;//cvReadRealByName(fs, m, "maximum_distance_mm",            1.0e4);
+	sl_params->dist_reject             = (float) 10.0; //cvReadRealByName(fs, m, "maximum_distance_variation_mm",   10.0);
+	sl_params->background_depth_thresh = (float) 20; //cvReadRealByName(fs, m, "minimum_background_distance_mm",  20.0);
 
 	// Enable both row and column scanning, if "ray-ray" reconstruction mode is enabled.
 	if(sl_params->mode == 2){
