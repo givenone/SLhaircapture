@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
 		true /*sl_params->scan_cols*/, true /*sl_params->scan_rows*/);
 
 	char dir[100], buf[100], buf2[1000];
-	sprintf(dir, "%d x %d", width, height);
+/*	sprintf(dir, "%d x %d", width, height);
 	mkdir(dir, 0776);
 
 	for(int i=0; i<(gray_ncols+gray_nrows+1); i++)
@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
 		cvSaveImage(buf, proj_gray_codes[i]);
 		cvReleaseImage(&proj_gray_codes[i]);
 	}
-
+*/
 	delete[] proj_gray_codes;
 // Codes below are for the 
 //	IplImage** proj_gray_codes_S = NULL;
@@ -193,9 +193,14 @@ int main(int argc, char* argv[])
 	// Create output directory (if output enabled).
 	char str[1024], outputDir[1024]; int scanindex = 1;
 	if(sl_params.save){
-		sprintf(outputDir, "%s\\%s\\%0.2d", sl_params.outdir, sl_params.object, scanindex);
-		mkdir(dir, 0776);
 
+		
+		sprintf(outputDir, "%s", sl_params.outdir);
+		cout << "saving into" << outputDir<< endl;
+		mkdir(outputDir, 0776);
+		sprintf(outputDir, "%s/%s", sl_params.outdir, sl_params.object);
+		mkdir(outputDir, 0776);
+		
 		printf("Saving the depth map...\n");
 		
 		IplImage* depth_map_image = cvCreateImage(cvSize(sl_params.cam_w, sl_params.cam_h), IPL_DEPTH_8U, 1);
@@ -214,9 +219,10 @@ int main(int argc, char* argv[])
 		cvmSet(dist_range, 0, 0, sl_params.dist_range[0]);
 		cvmSet(dist_range, 0, 1, sl_params.dist_range[1]);
 		char str[1024];
-		sprintf(str, "%s\\depth_map.png", outputDir);
+
+		sprintf(str, "%s/depth_map.png", outputDir);
 		cvSaveImage(str, depth_map_image);
-		sprintf(str, "%s\\depth_map_range.xml", outputDir);
+		sprintf(str, "%s/depth_map_range.xml", outputDir);
 		cvSave(str, dist_range);
 		cvReleaseImage(&depth_map_image);
 		cvReleaseMat(&dist_range);
@@ -224,12 +230,12 @@ int main(int argc, char* argv[])
 
 	// Save the texture map.
 	printf("Saving the texture map...\n");
-	sprintf(str, "%s\\%s\\%s_%0.2d.png", sl_params.outdir, sl_params.object, sl_params.object, scanindex);
+	sprintf(str, "%s/%s/%s_%0.2d.png", sl_params.outdir, sl_params.object, sl_params.object, scanindex);
 	cvSaveImage(str, cam_gray_codes[0]);
 
 	// Save the point cloud.
 	printf("Saving the point cloud...\n");
-	sprintf(str, "%s\\%s\\%s_%0.2d.wrl", sl_params.outdir, sl_params.object, sl_params.object, scanindex);
+	sprintf(str, "%s/%s/%s_%0.2d.wrl", sl_params.outdir, sl_params.object, sl_params.object, scanindex);
 	if(savePointsVRML(str, points, NULL, colors, mask)){
 		printf("Scanning was not successful and must be repeated!\n");
 		return -1;

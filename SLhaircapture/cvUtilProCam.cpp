@@ -218,17 +218,17 @@ void readConfiguration(const char* filename, struct slParams* sl_params){
 
 	// Read output directory and object (or sequence) name.
 
-	strcpy(sl_params->outdir, "./output");
-	strcpy(sl_params->object, "./output");
+	strcpy(sl_params->outdir, "output");
+	strcpy(sl_params->object, "output");
 	sl_params->save = true;
 
 	// Read camera parameters.
-	sl_params->cam_w         =  3024;
-	sl_params->cam_h         =  2048;
+	sl_params->cam_w         =  2048;
+	sl_params->cam_h         =  3072;
 
 	// Read projector parameters.
-	sl_params->proj_w      = 800;
-	sl_params->proj_h      = 600;
+	sl_params->proj_w      = 600;
+	sl_params->proj_h      = 800;
 //	sl_params->proj_invert = false;
 
 	// Read camera and projector gain parameters.

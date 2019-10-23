@@ -216,14 +216,18 @@ int decodeGrayCodes(int proj_width, int proj_height,
 	cvCvtColor(gray_codes[0], gray_1, CV_RGB2GRAY);
 	cvCvtColor(gray_codes[1], gray_2, CV_RGB2GRAY);
 
+	cout << 1 << endl;
 	cvAbsDiff(gray_1, gray_2, temp);
 	cvCmpS(temp, sl_thresh, temp, CV_CMP_GE);
+	cout << 1.5 << endl;
 	cvOr(temp, mask, mask);
 
+	cout << 2 << endl;
 	cvAdd(gray_1, gray_2, thresh_hold);
 	cvSet(temp, cvScalar(2));
 	cvDiv(thresh_hold, temp, thresh_hold); // mean of 2 images.
 
+	cout << 3 << endl;
 	// Decode Gray codes for projector columns.
 	cvZero(decoded_cols);
 	for(int i=0; i<n_cols; i++){
@@ -239,8 +243,10 @@ int decodeGrayCodes(int proj_width, int proj_height,
 			cvCopy(bit_plane_2, bit_plane_1);
 		cvAddS(decoded_cols, cvScalar(pow(2.0,n_cols-i-1)), decoded_cols, bit_plane_1);
 	}
+	cout << 4 << endl;
 	cvSubS(decoded_cols, cvScalar(col_shift), decoded_cols);
 
+	cout << 5 << endl;
 	// Decode Gray codes for projector rows.
 	cvZero(decoded_rows);
 	for(int i=0; i<n_rows; i++){
