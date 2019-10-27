@@ -107,3 +107,5 @@ struct slCalib{
 	IplImage* background_image;     // background image 
 	IplImage* background_mask;      // background mask
 };
+
+void initialize_background(struct slParam *sl_params, struct slCalib *sl_calib);
