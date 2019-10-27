@@ -55,42 +55,44 @@ int generateGrayCodes(int width, int height,
 	}	
 
 	// Allocate Gray codes.
-	gray_codes = new IplImage* [n_cols+n_rows+1];
-	for(int i=0; i<(n_cols+n_rows+1); i++)
+	gray_codes = new IplImage* [2*(n_cols+n_rows+1)];
+	for(int i=0; i<2*(n_cols+n_rows+1); i++)
 		gray_codes[i] = cvCreateImage(cvSize(width,height), IPL_DEPTH_8U, 1);
 	int step = gray_codes[0]->widthStep/sizeof(uchar);
 
 	// Define first code as a white image.
 	cvSet(gray_codes[0], cvScalar(255));
+	cvSet(gray_codes[1], cvScalar(0));
 
 	// Define Gray codes for projector columns.
 	for(int c=0; c<width; c++){
-		for(int i=0; i<n_cols; i++){
-			uchar* data = (uchar*)gray_codes[i+1]->imageData;
+		for(int i=0; i<2*n_cols; i+=2){
+			uchar* data = (uchar*)gray_codes[i+2]->imageData;
 			if(i>0)
-				data[c] = (((c+col_shift) >> (n_cols-i-1)) & 1)^(((c+col_shift) >> (n_cols-i)) & 1);
+				data[c] = (((c+col_shift) >> (n_cols-i/2-1)) & 1)^(((c+col_shift) >> (n_cols-i/2)) & 1);
 			else
-				data[c] = (((c+col_shift) >> (n_cols-i-1)) & 1);
+				data[c] = (((c+col_shift) >> (n_cols-i/2-1)) & 1);
 			data[c] *= 255;
 			for(int r=1; r<height; r++)
-				data[r*step+c] = data[c];	
+				data[r*step+c] = data[c];
+			cvSubRS(gray_codes[i+2], cvScalar(255), gray_codes[i+3]); 	
 		}
 	}
 
 	// Define Gray codes for projector rows.
 	for(int r=0; r<height; r++){
-		for(int i=0; i<n_rows; i++){
-			uchar* data = (uchar*)gray_codes[i+n_cols+1]->imageData;
+		for(int i=0; i<2*n_rows; i+=2){
+			uchar* data = (uchar*)gray_codes[i+2*n_cols+2]->imageData;
 			if(i>0)
-				data[r*step] = (((r+row_shift) >> (n_rows-i-1)) & 1)^(((r+row_shift) >> (n_rows-i)) & 1);
+				data[r*step] = (((r+row_shift) >> (n_rows-i/2-1)) & 1)^(((r+row_shift) >> (n_rows-i/2)) & 1);
 			else
-				data[r*step] = (((r+row_shift) >> (n_rows-i-1)) & 1);
+				data[r*step] = (((r+row_shift) >> (n_rows-i/2-1)) & 1);
 			data[r*step] *= 255;
 			for(int c=1; c<width; c++)
 				data[r*step+c] = data[r*step];	
+			cvSubRS(gray_codes[i+2*n_cols+2], cvScalar(255), gray_codes[i+2*n_cols+3]); 	
 		}
 	}
-
 	// Return without errors.
 	return 0;
 }

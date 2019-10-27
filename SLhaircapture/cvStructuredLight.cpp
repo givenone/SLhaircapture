@@ -91,9 +91,52 @@ void config(struct slParams *sl_params, struct slCalib *sl_calib)
 
 }
 
+void save_codes(int width, int height, IplImage**& proj_gray_codes, int& gray_ncols, int& gray_nrows,
+					  int& gray_colshift, int& gray_rowshift)
+{
+	generateGrayCodes(width /*sl_params->proj_w*/, height /*sl_params->proj_h*/, proj_gray_codes, 
+		gray_ncols, gray_nrows, gray_colshift, gray_rowshift, 
+		true , true);	
+
+	char dir[100], buf[100], buf2[1000];
+	sprintf(dir, "%d x %d", width, height);
+	mkdir(dir, 0776);
+
+	for(int i=0; i<2*(gray_ncols+gray_nrows+1); i++)
+	{
+		cout << i << endl;
+		sprintf(buf, "%s/code_%d.png", dir, i);
+		cvSaveImage(buf, proj_gray_codes[i]);
+		cout << i << endl;
+		cvReleaseImage(&proj_gray_codes[i]);
+		cout << i << endl;
+	}
+
+	delete[] proj_gray_codes;
+	cout << "normal pattern done" << endl;
+
+	IplImage** proj_gray_codes_S = NULL;
+	generateGrayCodes_S(width, height, proj_gray_codes_S, 
+		gray_ncols, gray_nrows, gray_colshift, gray_rowshift, 
+		true , true);
+
+	sprintf(dir, "%d x %d : shifting", width, height);
+	mkdir(dir, 0776);
+
+	for(int i=0; i<=(gray_ncols+gray_nrows+12); i++)
+	{
+		sprintf(buf2, "%s/code_%d.png", dir, i);
+		cvSaveImage(buf2, proj_gray_codes_S[i]);
+		cvReleaseImage(&proj_gray_codes_S[i]);
+	}
+
+	delete[] proj_gray_codes;
+}
+
 
 int save(struct slParams *sl_params, CvMat *depth_map, CvMat *points, CvMat *mask, CvMat *colors, IplImage **cam_gray_codes)
 {
+	
 	char str[1024], outputDir[1024]; int scanindex = 1;
 	if(sl_params->save){
 
@@ -154,56 +197,23 @@ int main(int argc, char* argv[])
 
 	int width = 800; int height = 600;
 
-	generateGrayCodes(width /*sl_params->proj_w*/, height /*sl_params->proj_h*/, proj_gray_codes, 
-		gray_ncols, gray_nrows, gray_colshift, gray_rowshift, 
-		true /*sl_params->scan_cols*/, true /*sl_params->scan_rows*/);
+	save_codes(width, height, proj_gray_codes, gray_ncols, gray_nrows,gray_colshift, gray_rowshift);
 
-	char dir[100], buf[100], buf2[1000];
-/*	sprintf(dir, "%d x %d", width, height);
-	mkdir(dir, 0776);
 
-	for(int i=0; i<(gray_ncols+gray_nrows+1); i++)
-	{
-		sprintf(buf, "%s/code_%d.png", dir, i);
-		cvSaveImage(buf, proj_gray_codes[i]);
-		cvReleaseImage(&proj_gray_codes[i]);
-	}
-*/
-	delete[] proj_gray_codes;
-// Codes below are for the 
-//	IplImage** proj_gray_codes_S = NULL;
-//	generateGrayCodes_S(width /*sl_params->proj_w*/, height /*sl_params->proj_h*/, proj_gray_codes_S, 
-//		gray_ncols, gray_nrows, gray_colshift, gray_rowshift, 
-//		true /*sl_params->scan_cols*/, true /*sl_params->scan_rows*/);
 /*
-	sprintf(dir, "%d x %d : shifting", width, height);
-	mkdir(dir, 0776);
-
-	for(int i=0; i<=(gray_ncols+gray_nrows+12); i++)
-	{
-		sprintf(buf2, "%s/code_%d.png", dir, i);
-		cvSaveImage(buf2, proj_gray_codes_S[i]);
-		cvReleaseImage(&proj_gray_codes_S[i]);
-	}
-
-	delete[] proj_gray_codes;
-*/
-
 	// input calibration
-
 	struct slParams sl_params; //	configuration
 	struct slCalib sl_calib; //	calibration
 	
 	readConfiguration(NULL, &sl_params);	
 		// Allocate storage for calibration parameters.
 	config(&sl_params, &sl_calib);	
-
 	evaluateProCamGeometry(&sl_params, &sl_calib); 
 
 	cout << "evaluated Projector Camera Geometry" << endl;
-/*
-	프로젝터가 원점 ! -> no extrinsic value
-*/
+
+	//	프로젝터가 원점 ! -> no extrinsic value
+
 	// Initialize background model.
 
 	initialize_background(&sl_params, &sl_calib);
@@ -224,9 +234,9 @@ int main(int argc, char* argv[])
 
 	IplImage* gray_decoded_cols = cvCreateImage(cvSize(sl_params.cam_w, sl_params.cam_h), IPL_DEPTH_16U, 1);
 	IplImage* gray_decoded_rows = cvCreateImage(cvSize(sl_params.cam_w, sl_params.cam_h), IPL_DEPTH_16U, 1);
-	IplImage* gray_mask /* what is this ? */ = cvCreateImage(cvSize(sl_params.cam_w, sl_params.cam_h), IPL_DEPTH_8U,  1);
+	IplImage* gray_mask = cvCreateImage(cvSize(sl_params.cam_w, sl_params.cam_h), IPL_DEPTH_8U,  1);
 	decodeGrayCodes(sl_params.proj_w, sl_params.proj_h,
-					cam_gray_codes /* image read by camera */, 
+					cam_gray_codes, // image read by camera 
 					gray_decoded_cols, gray_decoded_rows, gray_mask,
 					gray_ncols, gray_nrows, 
 					gray_colshift, gray_rowshift, 
@@ -235,7 +245,7 @@ int main(int argc, char* argv[])
 	// display result
 	cout << "Succesfully decoded gray codes" << endl;
 
-//	displayDecodingResults(gray_decoded_cols, gray_decoded_rows, gray_mask, sl_params);
+	//	displayDecodingResults(gray_decoded_cols, gray_decoded_rows, gray_mask, sl_params);
 
 	// reconstruction
 
@@ -251,11 +261,11 @@ int main(int argc, char* argv[])
 
 	cout << "finished reconstruction !" << endl;
 	// display depth map
-//	displayDepthMap(depth_map, gray_mask, &sl_params);
+	//	displayDepthMap(depth_map, gray_mask, &sl_params);
 
 	// Create output directory (if output enabled).
 	save(&sl_params, depth_map, points, mask, colors, cam_gray_codes);
-
+*/
 	return 0;
     
 }
