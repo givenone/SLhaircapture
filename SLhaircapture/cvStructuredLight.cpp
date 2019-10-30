@@ -193,7 +193,7 @@ int save(struct slParams *sl_params, CvMat *depth_map, CvMat *points, CvMat *mas
 
 	// Save the point cloud.
 	printf("Saving the point cloud...\n");
-	sprintf(str, "%s/%s/%s_%0.2d.wrl", sl_params->outdir, sl_params->object, sl_params->object, scanindex);
+	sprintf(str, "%s/%s/%s_%0.2d.xyz", sl_params->outdir, sl_params->object, sl_params->object, scanindex);
 	if(savePointsVRML(str, points, NULL, colors, mask)){
 		printf("Scanning was not successful and must be repeated!\n");
 		return -1;
@@ -225,9 +225,6 @@ int main(int argc, char* argv[])
 		// Allocate storage for calibration parameters.
 	config(&sl_params, &sl_calib);
 
-	printMat(sl_calib.proj_intrinsic);
-	printMat(sl_calib.cam_intrinsic);
-	printMat(sl_calib.proj_extrinsic);
 	evaluateProCamGeometry(&sl_params, &sl_calib); 
 
 	cout << "evaluated Projector Camera Geometry" << endl;

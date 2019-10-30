@@ -364,11 +364,8 @@ int reconstructStructuredLight(struct slParams* sl_params,
 						for(int i=0; i<4; i++)
 							w[i] = sl_calib->proj_row_planes->data.fl[4*corresponding_row+i];
 						intersectLineWithPlane3D(q, v, w, point_rows, depth_rows);
-
-						if(point_rows[0] == 0 && point_rows[1] == 0 && point_rows[2] == 0)
-						{
-						//	cout << c << ' ' << r << ' ' << q[0] << q[1] << q[2] << endl << v[0] << v[1] << v[2] << endl << w[0] << w[1] << w[2] << v << w ;
-						}
+						printf("%f %f %f, %f %f %f, %f %f %f, h : %f , d : %f\n", q[0], q[1], q[2], v[0], v[1], v[2], w[0], w[1], w[2],
+						point_rows[2], depth_rows);
 					}
 
 					// Average points of intersection (if row and column scanning are both enabled).

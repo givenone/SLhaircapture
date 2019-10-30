@@ -140,15 +140,17 @@ int savePointsVRML(char* filename,
 		fprintf(stderr,"ERROR: Cannot open VRML file!\n");
 		return -1;
 	}
-	fprintf(pFile, "#VRML V2.0 utf8\n");
-	fprintf(pFile, "Shape {\n");
-	fprintf(pFile, " geometry IndexedFaceSet {\n");
+//	fprintf(pFile, "#VRML V2.0 utf8\n");
+//	fprintf(pFile, "Shape {\n");
+//	fprintf(pFile, " geometry IndexedFaceSet {\n");
 
 	// Output points (i.e., indexed face set vertices).
 	// Note: Flip y-component for compatibility with Java-based viewer.
 	if(points != NULL){
-		fprintf(pFile, "  coord Coordinate {\n");
-		fprintf(pFile, "   point [\n");
+//		fprintf(pFile, "  coord Coordinate {\n");
+//		fprintf(pFile, "   point [\n");
+		fprintf(pFile, " %d \n", points->cols);
+		fprintf(pFile, "points cloud \n");
 		for(int c=0; c<points->cols; c++){
 			if(mask == NULL || mask->data.fl[c] != 0){
 				for(int r=0; r<points->rows; r++){
@@ -160,13 +162,13 @@ int savePointsVRML(char* filename,
 				fprintf(pFile, "\n");
 			}
 		}
-		fprintf(pFile, "   ]\n");
-		fprintf(pFile, "  }\n");
+//		fprintf(pFile, "   ]\n");
+//		fprintf(pFile, "  }\n");
 	}
 
 	// Output normals (if provided).
 	// Note: Flips normals, for compatibility with Java-based viewer.
-	if(normals != NULL){
+/*	if(normals != NULL){
 		fprintf(pFile, "  normalPerVertex TRUE\n");
 		fprintf(pFile, "  normal Normal {\n");
 		fprintf(pFile, "   vector [\n");
@@ -200,7 +202,7 @@ int savePointsVRML(char* filename,
 
 	// Create footer and close file.
 	fprintf(pFile, " }\n");
-	fprintf(pFile, "}\n");
+	fprintf(pFile, "}\n");*/
 	if(fclose(pFile) != 0){
 		printf("ERROR: Cannot close VRML file!\n");
 		return -1;
@@ -259,8 +261,8 @@ void readConfiguration(const char* filename, struct slParams* sl_params){
 
 	sl_params->thresh                  = 50;
 
-	sl_params->dist_range[0]           = (float) 0.0; //cvReadRealByName(fs, m, "minimum_distance_mm",              0.0);
-	sl_params->dist_range[1]           = (float) 1.0e4;//cvReadRealByName(fs, m, "maximum_distance_mm",            1.0e4);
+	sl_params->dist_range[0]           = (float) -10.0; //cvReadRealByName(fs, m, "minimum_distance_mm",              0.0);
+	sl_params->dist_range[1]           = (float) 1.0e10;//cvReadRealByName(fs, m, "maximum_distance_mm",            1.0e4);
 	sl_params->dist_reject             = (float) 10.0; //cvReadRealByName(fs, m, "maximum_distance_variation_mm",   10.0);
 	sl_params->background_depth_thresh = (float) 20; //cvReadRealByName(fs, m, "minimum_background_distance_mm",  20.0);
 
