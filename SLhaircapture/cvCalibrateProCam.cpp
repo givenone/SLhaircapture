@@ -68,11 +68,14 @@ int evaluateProCamGeometry(struct slParams* sl_params, struct slCalib* sl_calib)
 	for(int r=0; r<sl_params->proj_h; r++)
 		for(int c=0; c<sl_params->proj_w; c++)
 			cvSet1D(proj_dist_points, (sl_params->proj_w)*r+c, cvScalar(float(c), float(r)));
+	
 	cvUndistortPoints(proj_dist_points, proj_undist_points, sl_calib->proj_intrinsic, sl_calib->proj_distortion, NULL, NULL);
+
+	printMat(sl_calib->proj_intrinsic);
 	for(int i=0; i<proj_nelems; i++){
 		CvScalar pd = cvGet1D(proj_undist_points, i);
 		float norm = (float)sqrt(pow(pd.val[0],2)+pow(pd.val[1],2)+1.0);
-		printf("%f %f\n", pd.val[0], pd.val[1]);
+		//printf("%f %f\n", pd.val[0], pd.val[1]);
 		sl_calib->proj_rays->data.fl[i]               = (float)pd.val[0]/norm;
 		sl_calib->proj_rays->data.fl[i+  proj_nelems] = (float)pd.val[1]/norm;
 		sl_calib->proj_rays->data.fl[i+2*proj_nelems] = (float)1.0/norm;

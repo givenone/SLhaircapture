@@ -42,13 +42,19 @@ void config(struct slParams *sl_params, struct slCalib *sl_calib)
 	sl_calib->proj_column_planes     = cvCreateMat(sl_params->proj_w, 4, CV_32FC1);
 	sl_calib->proj_row_planes        = cvCreateMat(sl_params->proj_h, 4, CV_32FC1);
 
-//	double center[3] = {0, 0, 0};
-//	cvInitMatHeader(sl_calib.proj_center, 3, 3, CV_32FC1, center); this is done in "evaluate pro cam in calibrateprocam.cpp"
-	
 	float cam_intrinsic[3][3] = { {6799.891745995248, 0, 1684.663925292664}, {0, 6819.065266606978, 897.2080419838242}, {0, 0, 1}};
 	float cam_distortion[5] = { -0.1081234940885747, 1.019777262201034, -0.01496156727613678, 0.007012687213256888, 0};
-	cvInitMatHeader(sl_calib->cam_intrinsic, 3, 3, CV_32FC1, cam_intrinsic);
-	cvInitMatHeader(sl_calib->cam_distortion, 5, 1, CV_32FC1, cam_distortion);
+
+	for(int i=0; i<3; i++) 
+	{
+		for(int j=0; j<3; j++)
+		{
+			CV_MAT_ELEM(*sl_calib->cam_intrinsic, float, i, j) = cam_intrinsic[i][j];
+		}
+	}
+	for(int i=0; i<5; i++) CV_MAT_ELEM(*sl_calib->cam_distortion, float, i, 0) = cam_distortion[i];
+	//cvInitMatHeader(sl_calib->cam_intrinsic, 3, 3, CV_32FC1, cam_intrinsic);
+	//cvInitMatHeader(sl_calib->cam_distortion, 5, 1, CV_32FC1, cam_distortion);
 
 	float cam_rotation[9] = {-0.9465088474336322, -0.02181055404986991, -0.3219399034942621, 
 		0.03029318697689328, -0.9993127627683679, -0.02136176469851316, 
@@ -69,9 +75,18 @@ void config(struct slParams *sl_params, struct slCalib *sl_calib)
 		{0, 2105.254975139322, 519.7798700367449},
 		{0, 0, 1} };
 	float proj_distortion[5] = { 0.04757942626277912, -0.4940169148610814, 0.01733058285795064, 0.01007747086733519, 0 };
+	
+	for(int i=0; i<3; i++) 
+	{
+		for(int j=0; j<3; j++)
+		{
+			CV_MAT_ELEM(*sl_calib->proj_intrinsic, float, i, j) = proj_intrinsic[i][j];
+		}
+	}
+	for(int i=0; i<5; i++) CV_MAT_ELEM(*sl_calib->proj_distortion, float, i, 0) = proj_distortion[i];
+	//cvInitMatHeader(sl_calib->proj_intrinsic, 3, 3, CV_32FC1, proj_intrinsic);
+	//cvInitMatHeader(sl_calib->proj_distortion, 5, 1, CV_32FC1, proj_distortion);
 
-	cvInitMatHeader(sl_calib->proj_intrinsic, 3, 3, CV_32FC1, proj_intrinsic);
-	cvInitMatHeader(sl_calib->proj_distortion, 5, 1, CV_32FC1, proj_distortion);
 
 	float proj_rotation[9] = { 1, 0, 0, 0, 1, 0, 0, 0, 1};
 	float proj_translation[3] = {0, 0, 0};
@@ -208,7 +223,11 @@ int main(int argc, char* argv[])
 	
 	readConfiguration(NULL, &sl_params);	
 		// Allocate storage for calibration parameters.
-	config(&sl_params, &sl_calib);	
+	config(&sl_params, &sl_calib);
+
+	printMat(sl_calib.proj_intrinsic);
+	printMat(sl_calib.cam_intrinsic);
+	printMat(sl_calib.proj_extrinsic);
 	evaluateProCamGeometry(&sl_params, &sl_calib); 
 
 	cout << "evaluated Projector Camera Geometry" << endl;
