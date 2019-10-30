@@ -68,6 +68,7 @@ void cvFitPlane(const CvMat* points, float* plane){
 	cvReleaseMat(&V);
 }
 
+
 // Find intersection between a 3D plane and a 3D line.
 // Note: Finds the point of intersection of a line in parametric form 
 //       (i.e., containing a point Q and spanned by the vector V, with 
@@ -252,11 +253,11 @@ void readConfiguration(const char* filename, struct slParams* sl_params){
 	// Read scanning and reconstruction parameters.
 
 	// **** mode 1이면 ray-plane or ray-ray 2이면 ray-ray
-	sl_params->mode                    =  2;      // cvReadIntByName(fs,  m, "mode",                               2);
+	sl_params->mode                    =  1;      // cvReadIntByName(fs,  m, "mode",                               2);
 	sl_params->scan_cols               =  true; //      (cvReadIntByName(fs,  m, "reconstruct_columns",                1) != 0);
 	sl_params->scan_rows               =  true; //      (cvReadIntByName(fs,  m, "reconstruct_rows",                   1) != 0);
 
-	sl_params->thresh                  = 32;
+	sl_params->thresh                  = 50;
 
 	sl_params->dist_range[0]           = (float) 0.0; //cvReadRealByName(fs, m, "minimum_distance_mm",              0.0);
 	sl_params->dist_range[1]           = (float) 1.0e4;//cvReadRealByName(fs, m, "maximum_distance_mm",            1.0e4);
@@ -265,8 +266,22 @@ void readConfiguration(const char* filename, struct slParams* sl_params){
 
 	// Enable both row and column scanning, if "ray-ray" reconstruction mode is enabled.
 	if(sl_params->mode == 2){
-		sl_params->scan_cols = true;
+		sl_params->scan_cols = false;
 		sl_params->scan_rows = true;
 	}
 }
 
+
+void printMat(CvMat* mat)
+{
+	for(int j=0; j<mat->cols; j++)  printf("%10d",j+1);
+	printf("\n");
+    for(int i=0; i<mat->rows; i++)
+    {
+        for(int j=0; j<mat->cols; j++)
+        {
+            printf("%10.2f",cvGet2D(mat,i,j).val[0]);
+        }
+		printf("\n");
+    }
+}

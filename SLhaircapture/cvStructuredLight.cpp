@@ -45,38 +45,38 @@ void config(struct slParams *sl_params, struct slCalib *sl_calib)
 //	double center[3] = {0, 0, 0};
 //	cvInitMatHeader(sl_calib.proj_center, 3, 3, CV_32FC1, center); this is done in "evaluate pro cam in calibrateprocam.cpp"
 	
-	double cam_intrinsic[3][3] = { {6799.891745995248, 0, 1684.663925292664}, {0, 6819.065266606978, 897.2080419838242}, {0, 0, 1}};
-	double cam_distortion[5] = { -0.1081234940885747, 1.019777262201034, -0.01496156727613678, 0.007012687213256888, 0};
+	float cam_intrinsic[3][3] = { {6799.891745995248, 0, 1684.663925292664}, {0, 6819.065266606978, 897.2080419838242}, {0, 0, 1}};
+	float cam_distortion[5] = { -0.1081234940885747, 1.019777262201034, -0.01496156727613678, 0.007012687213256888, 0};
 	cvInitMatHeader(sl_calib->cam_intrinsic, 3, 3, CV_32FC1, cam_intrinsic);
 	cvInitMatHeader(sl_calib->cam_distortion, 5, 1, CV_32FC1, cam_distortion);
 
-	double cam_rotation[9] = {-0.9465088474336322, -0.02181055404986991, -0.3219399034942621, 
+	float cam_rotation[9] = {-0.9465088474336322, -0.02181055404986991, -0.3219399034942621, 
 		0.03029318697689328, -0.9993127627683679, -0.02136176469851316, 
 		-0.3212527424826753, -0.0299716849758128, 0.9465190825055085 
 		};
-	double cam_translation[3] = {208.4992551331917, -9.241636763329311, 63.17988709955341};
+	float cam_translation[3] = {208.4992551331917, -9.241636763329311, 63.17988709955341};
 
 	CvMat* r = cvCreateMat(1, 3, CV_32FC1);
 	CvMat* t = cvCreateMat(1, 3, CV_32FC1);
 	CvMat* R = cvCreateMat(3, 3, CV_64F);
 	cvInitMatHeader(R, 3, 3, CV_32FC1, cam_rotation);
-	cvInitMatHeader(r, 1, 3, CV_32FC1, cam_translation);
+	cvInitMatHeader(t, 1, 3, CV_32FC1, cam_translation);
 	cvRodrigues2(R, r, NULL); // rotation vector
 	for(int i=0; i<3; i++) CV_MAT_ELEM(*sl_calib->cam_extrinsic, float, 0, i) = (float)cvmGet(r, 0, i);
 	for(int i=0; i<3; i++) CV_MAT_ELEM(*sl_calib->cam_extrinsic, float, 1, i) = (float)cvmGet(t, 0, i);
 
-	double proj_intrinsic[3][3] = { {1583.136672775252, 0, 516.2688867516777},
+	float proj_intrinsic[3][3] = { {1583.136672775252, 0, 516.2688867516777},
 		{0, 2105.254975139322, 519.7798700367449},
 		{0, 0, 1} };
-	double proj_distortion[5] = { 0.04757942626277912, -0.4940169148610814, 0.01733058285795064, 0.01007747086733519, 0 };
+	float proj_distortion[5] = { 0.04757942626277912, -0.4940169148610814, 0.01733058285795064, 0.01007747086733519, 0 };
 
 	cvInitMatHeader(sl_calib->proj_intrinsic, 3, 3, CV_32FC1, proj_intrinsic);
 	cvInitMatHeader(sl_calib->proj_distortion, 5, 1, CV_32FC1, proj_distortion);
 
-	double proj_rotation[9] = { 1, 0, 0, 0, 1, 0, 0, 0, 1};
-	double proj_translation[3] = {0, 0, 0};
+	float proj_rotation[9] = { 1, 0, 0, 0, 1, 0, 0, 0, 1};
+	float proj_translation[3] = {0, 0, 0};
 	cvInitMatHeader(R, 3, 3, CV_32FC1, proj_rotation);
-	cvInitMatHeader(r, 1, 3, CV_32FC1, proj_translation);
+	cvInitMatHeader(t, 1, 3, CV_32FC1, proj_translation);
 	cvRodrigues2(R, r, NULL); // rotation vector
 	for(int i=0; i<3; i++) CV_MAT_ELEM(*sl_calib->proj_extrinsic, float, 0, i) = (float)cvmGet(r, 0, i);
 	for(int i=0; i<3; i++) CV_MAT_ELEM(*sl_calib->proj_extrinsic, float, 1, i) = (float)cvmGet(t, 0, i);
@@ -94,9 +94,7 @@ void config(struct slParams *sl_params, struct slCalib *sl_calib)
 void save_codes(int width, int height, IplImage**& proj_gray_codes, int& gray_ncols, int& gray_nrows,
 					  int& gray_colshift, int& gray_rowshift)
 {
-	generateGrayCodes(width /*sl_params->proj_w*/, height /*sl_params->proj_h*/, proj_gray_codes, 
-		gray_ncols, gray_nrows, gray_colshift, gray_rowshift, 
-		true , true);	
+	
 
 	char dir[100], buf[100], buf2[1000];
 	sprintf(dir, "%d x %d", width, height);
@@ -197,10 +195,13 @@ int main(int argc, char* argv[])
 
 	int width = 800; int height = 600;
 
-	save_codes(width, height, proj_gray_codes, gray_ncols, gray_nrows,gray_colshift, gray_rowshift);
+	generateGrayCodes(width, height, proj_gray_codes, gray_ncols, gray_nrows, gray_colshift, gray_rowshift, 
+		true , true);
+
+//	save_codes(width, height, proj_gray_codes, gray_ncols, gray_nrows,gray_colshift, gray_rowshift);
 
 
-/*
+
 	// input calibration
 	struct slParams sl_params; //	configuration
 	struct slCalib sl_calib; //	calibration
@@ -221,8 +222,8 @@ int main(int argc, char* argv[])
 	// read imange
 
 	IplImage** cam_gray_codes = NULL; char temp [100];
-	cam_gray_codes = new IplImage* [2*(gray_ncols+gray_nrows+1)];
-	for(int i=0; i<2*(gray_ncols+gray_nrows+1); i++)
+	cam_gray_codes = new IplImage* [(gray_ncols+gray_nrows+1)];
+	for(int i=0; i<=(gray_ncols+gray_nrows+1); i++)
 	{
 		sprintf(temp, "./Face_6mp_01/800x600/%02d.png", i);
 		cam_gray_codes[i] = cvLoadImage(temp); //// TODO : read png files & need to modify array size
@@ -265,7 +266,7 @@ int main(int argc, char* argv[])
 
 	// Create output directory (if output enabled).
 	save(&sl_params, depth_map, points, mask, colors, cam_gray_codes);
-*/
+
 	return 0;
     
 }

@@ -8,3 +8,4 @@ int savePointsVRML(char* filename, CvMat* points, CvMat* normals, CvMat* colors,
 
 void readConfiguration(const char* filename, struct slParams* sl_params);
 
+void printMat(CvMat* mat);

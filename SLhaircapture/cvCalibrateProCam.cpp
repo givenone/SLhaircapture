@@ -32,9 +32,14 @@ int evaluateProCamGeometry(struct slParams* sl_params, struct slCalib* sl_calib)
 
 	// Determine centers of projection.
 	// Note: All positions are in coordinate system of the first camera.
-	cvSet(sl_calib->cam_center, cvScalar(0));
-	cvGEMM(proj_rotation, proj_translation, -1, NULL, 0, sl_calib->proj_center, CV_GEMM_A_T);
-	cvGEMM(cam_rotation, sl_calib->proj_center, 1, cam_translation, 1, sl_calib->proj_center, 0);
+	//cvSet(sl_calib->cam_center, cvScalar(0));
+	//cvGEMM(proj_rotation, proj_translation, -1, NULL, 0, sl_calib->proj_center, CV_GEMM_A_T);
+	//cvGEMM(cam_rotation, sl_calib->proj_center, 1, cam_translation, 1, sl_calib->proj_center, 0);
+
+	// our syste : All positions are in coordinate system of the projector 
+	cvSet(sl_calib->proj_center, cvScalar(0));
+	cvGEMM(cam_rotation, cam_translation, -1, NULL, 0, sl_calib->cam_center, CV_GEMM_A_T);
+	cvGEMM(proj_rotation, sl_calib->cam_center, 1, proj_translation, 1, sl_calib->cam_center, 0);
 
 	// Pre-compute optical rays for each camera pixel.
 	int    cam_nelems        = sl_params->cam_w*sl_params->cam_h;
@@ -44,8 +49,10 @@ int evaluateProCamGeometry(struct slParams* sl_params, struct slCalib* sl_calib)
 		for(int c=0; c<sl_params->cam_w; c++)
 			cvSet1D(cam_dist_points, (sl_params->cam_w)*r+c, cvScalar(float(c), float(r)));
 	cvUndistortPoints(cam_dist_points, cam_undist_points, sl_calib->cam_intrinsic, sl_calib->cam_distortion, NULL, NULL);
+
 	for(int i=0; i<cam_nelems; i++){
 		CvScalar pd = cvGet1D(cam_undist_points, i);
+		
 		float norm = (float)sqrt(pow(pd.val[0],2)+pow(pd.val[1],2)+1.0);
 		sl_calib->cam_rays->data.fl[i]              = (float)pd.val[0]/norm;
 		sl_calib->cam_rays->data.fl[i+  cam_nelems] = (float)pd.val[1]/norm;
@@ -65,6 +72,7 @@ int evaluateProCamGeometry(struct slParams* sl_params, struct slCalib* sl_calib)
 	for(int i=0; i<proj_nelems; i++){
 		CvScalar pd = cvGet1D(proj_undist_points, i);
 		float norm = (float)sqrt(pow(pd.val[0],2)+pow(pd.val[1],2)+1.0);
+		printf("%f %f\n", pd.val[0], pd.val[1]);
 		sl_calib->proj_rays->data.fl[i]               = (float)pd.val[0]/norm;
 		sl_calib->proj_rays->data.fl[i+  proj_nelems] = (float)pd.val[1]/norm;
 		sl_calib->proj_rays->data.fl[i+2*proj_nelems] = (float)1.0/norm;
