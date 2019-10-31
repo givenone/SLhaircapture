@@ -1240,7 +1240,6 @@ int evaluateProCamGeometry(struct slParams* sl_params, struct slCalib* sl_calib)
 	for(int i=0; i<3; i++)
 		cvmSet(proj_translation, i, 0, cvmGet(sl_calib->proj_extrinsic, 1, i));
 	cvReleaseMat(&r);
-
 	// Determine centers of projection.
 	// Note: All positions are in coordinate system of the first camera.
 	cvSet(sl_calib->cam_center, cvScalar(0));
@@ -1342,3 +1341,4 @@ int evaluateProCamGeometry(struct slParams* sl_params, struct slCalib* sl_calib)
 	// Return without errors.
 	return 0;
 }
+

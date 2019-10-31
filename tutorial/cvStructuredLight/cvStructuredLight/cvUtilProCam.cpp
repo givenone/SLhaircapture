@@ -247,21 +247,21 @@ int savePointsVRML(char* filename,
 		return -1;
 	}
 	fprintf(pFile, "#VRML V2.0 utf8\n");
-	fprintf(pFile, "Shape {\n");
-	fprintf(pFile, " geometry IndexedFaceSet {\n");
+	fprintf(pFile, "Shape {");
+	fprintf(pFile, "geometry IndexedFaceSet { creaseAngle 0.5\n");
 
 	// Output points (i.e., indexed face set vertices).
 	// Note: Flip y-component for compatibility with Java-based viewer.
 	if(points != NULL){
-		fprintf(pFile, "  coord Coordinate {\n");
-		fprintf(pFile, "   point [\n");
+		fprintf(pFile, "coord Coordinate {\n");
+		fprintf(pFile, "point [\n");
 		for(int c=0; c<points->cols; c++){
 			if(mask == NULL || mask->data.fl[c] != 0){
 				for(int r=0; r<points->rows; r++){
 					if(r != 1)
-						fprintf(pFile, "    %f ",  points->data.fl[c + points->cols*r]);
+						fprintf(pFile, "%f ",  points->data.fl[c + points->cols*r]);
 					else
-						fprintf(pFile, "    %f ", -points->data.fl[c + points->cols*r]);
+						fprintf(pFile, "%f ", -points->data.fl[c + points->cols*r]);
 				}
 				fprintf(pFile, "\n");
 			}
