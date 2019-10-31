@@ -92,6 +92,10 @@ void intersectLineWithPlane3D(const float* q,
 	depth = (w[3]-n_dot_q)/n_dot_v;
 	for(int i=0; i<3; i++)
 		p[i] = q[i] + depth*v[i];
+
+	//printf("%f\n", depth);
+	//printf("%f %f %f, %f %f %f,// %f %f %f,%f\n", q[0], q[1], q[2], v[0], v[1], v[2], w[0], w[1], w[2], w[3]);
+	//printf("%f %f %f\n", p[0], p[1], p[2]);
 }
 
 // Find closest point to two 3D lines.
@@ -147,17 +151,24 @@ int savePointsVRML(char* filename,
 	// Output points (i.e., indexed face set vertices).
 	// Note: Flip y-component for compatibility with Java-based viewer.
 	if(points != NULL){
+		int cnt = 0;
+		for(int c=0;c<points->cols; c++){
+			if(mask == NULL || mask->data.fl[c] != 0) cnt++;
+		}
 //		fprintf(pFile, "  coord Coordinate {\n");
 //		fprintf(pFile, "   point [\n");
-		fprintf(pFile, " %d \n", points->cols);
+		fprintf(pFile, " %d \n", cnt);
 		fprintf(pFile, "points cloud \n");
 		for(int c=0; c<points->cols; c++){
 			if(mask == NULL || mask->data.fl[c] != 0){
+				
+				fprintf(pFile, "0 ");
+				
 				for(int r=0; r<points->rows; r++){
 					if(r != 1)
 						fprintf(pFile, "    %f ",  points->data.fl[c + points->cols*r]);
 					else
-						fprintf(pFile, "    %f ", -points->data.fl[c + points->cols*r]);
+						fprintf(pFile, "    %f ", points->data.fl[c + points->cols*r]);
 				}
 				fprintf(pFile, "\n");
 			}
@@ -256,13 +267,13 @@ void readConfiguration(const char* filename, struct slParams* sl_params){
 
 	// **** mode 1이면 ray-plane or ray-ray 2이면 ray-ray
 	sl_params->mode                    =  1;      // cvReadIntByName(fs,  m, "mode",                               2);
-	sl_params->scan_cols               =  true; //      (cvReadIntByName(fs,  m, "reconstruct_columns",                1) != 0);
+	sl_params->scan_cols               =  false; //      (cvReadIntByName(fs,  m, "reconstruct_columns",                1) != 0);
 	sl_params->scan_rows               =  true; //      (cvReadIntByName(fs,  m, "reconstruct_rows",                   1) != 0);
 
-	sl_params->thresh                  = 50;
+	sl_params->thresh                  = 45;
 
-	sl_params->dist_range[0]           = (float) -10.0; //cvReadRealByName(fs, m, "minimum_distance_mm",              0.0);
-	sl_params->dist_range[1]           = (float) 1.0e10;//cvReadRealByName(fs, m, "maximum_distance_mm",            1.0e4);
+	sl_params->dist_range[0]           = (float) -100.0; //cvReadRealByName(fs, m, "minimum_distance_mm",              0.0);
+	sl_params->dist_range[1]           = (float) -60.0;//cvReadRealByName(fs, m, "maximum_distance_mm",            1.0e4);
 	sl_params->dist_reject             = (float) 10.0; //cvReadRealByName(fs, m, "maximum_distance_variation_mm",   10.0);
 	sl_params->background_depth_thresh = (float) 20; //cvReadRealByName(fs, m, "minimum_background_distance_mm",  20.0);
 

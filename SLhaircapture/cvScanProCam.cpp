@@ -364,8 +364,8 @@ int reconstructStructuredLight(struct slParams* sl_params,
 						for(int i=0; i<4; i++)
 							w[i] = sl_calib->proj_row_planes->data.fl[4*corresponding_row+i];
 						intersectLineWithPlane3D(q, v, w, point_rows, depth_rows);
-						printf("%f %f %f, %f %f %f, %f %f %f, h : %f , d : %f\n", q[0], q[1], q[2], v[0], v[1], v[2], w[0], w[1], w[2],
-						point_rows[2], depth_rows);
+						//printf("%f %f %f, %f %f %f, %f %f %f, h : %f , d : %f\n", q[0], q[1], q[2], v[0], v[1], v[2], w[0], w[1], w[2],
+						//point_rows[2], depth_rows);
 					}
 
 					// Average points of intersection (if row and column scanning are both enabled).
@@ -438,7 +438,7 @@ int reconstructStructuredLight(struct slParams* sl_params,
 
 				// Reject background points.
 				// Note: Currently only uses depth to determine foreground vs. background pixels.
-				float depth_difference = 
+	/*			float depth_difference = 
 					background_depth_map->data.fl[sl_params->cam_w*r+c] - 
 					depth_map->data.fl[sl_params->cam_w*r+c];
 				if(depth_difference < sl_params->background_depth_thresh && 
@@ -450,8 +450,8 @@ int reconstructStructuredLight(struct slParams* sl_params,
 					for(int i=0; i<3; i++)
 						points->data.fl[sl_params->cam_w*r+c+cam_nelems*i] = 0;
 					for(int i=0; i<3; i++)
-						colors->data.fl[sl_params->cam_w*r+c+cam_nelems*i] = 0;
-				}
+						colors->data.fl[sl_params->cam_w*r+c+cam_nelems*i] = 0;x
+				}*/
 			}
 		}
 	}

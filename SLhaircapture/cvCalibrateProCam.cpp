@@ -30,13 +30,7 @@ int evaluateProCamGeometry(struct slParams* sl_params, struct slCalib* sl_calib)
 		cvmSet(proj_translation, i, 0, cvmGet(sl_calib->proj_extrinsic, 1, i));
 	cvReleaseMat(&r);
 
-	// Determine centers of projection.
-	// Note: All positions are in coordinate system of the first camera.
-	//cvSet(sl_calib->cam_center, cvScalar(0));
-	//cvGEMM(proj_rotation, proj_translation, -1, NULL, 0, sl_calib->proj_center, CV_GEMM_A_T);
-	//cvGEMM(cam_rotation, sl_calib->proj_center, 1, cam_translation, 1, sl_calib->proj_center, 0);
-
-	// our syste : All positions are in coordinate system of the projector 
+	// our system : All positions are in coordinate system of the projector 
 	cvSet(sl_calib->proj_center, cvScalar(0));
 	cvGEMM(cam_rotation, cam_translation, -1, NULL, 0, sl_calib->cam_center, CV_GEMM_A_T);
 	cvGEMM(proj_rotation, sl_calib->cam_center, 1, proj_translation, 1, sl_calib->cam_center, 0);
@@ -69,6 +63,7 @@ int evaluateProCamGeometry(struct slParams* sl_params, struct slCalib* sl_calib)
 		for(int c=0; c<sl_params->proj_w; c++)
 			cvSet1D(proj_dist_points, (sl_params->proj_w)*r+c, cvScalar(float(c), float(r)));
 	
+
 	cvUndistortPoints(proj_dist_points, proj_undist_points, sl_calib->proj_intrinsic, sl_calib->proj_distortion, NULL, NULL);
 
 	for(int i=0; i<proj_nelems; i++){
@@ -90,10 +85,10 @@ int evaluateProCamGeometry(struct slParams* sl_params, struct slCalib* sl_calib)
 	// Evaluate scale factor (to assist in plane-fitting).
 	float scale = 0;
 	for(int i=0; i<3; i++)
-		scale += pow((float)sl_calib->proj_center->data.fl[i],(float)2.0);
+		scale += pow((float)sl_calib->cam_center->data.fl[i],(float)2.0);
 	scale = sqrt(scale);
-
-	// Estimate plane equations describing every projector column.
+	
+		// Estimate plane equations describing every projector column.
     // Note: Resulting coefficient vector is in camera coordinate system.
 	for(int c=0; c<sl_params->proj_w; c++){
 		CvMat* points = cvCreateMat(sl_params->proj_h+1, 3, CV_32FC1);

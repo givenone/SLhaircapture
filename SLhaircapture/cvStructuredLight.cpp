@@ -53,8 +53,6 @@ void config(struct slParams *sl_params, struct slCalib *sl_calib)
 		}
 	}
 	for(int i=0; i<5; i++) CV_MAT_ELEM(*sl_calib->cam_distortion, float, i, 0) = cam_distortion[i];
-	//cvInitMatHeader(sl_calib->cam_intrinsic, 3, 3, CV_32FC1, cam_intrinsic);
-	//cvInitMatHeader(sl_calib->cam_distortion, 5, 1, CV_32FC1, cam_distortion);
 
 	float cam_rotation[9] = {-0.9465088474336322, -0.02181055404986991, -0.3219399034942621, 
 		0.03029318697689328, -0.9993127627683679, -0.02136176469851316, 
@@ -84,8 +82,6 @@ void config(struct slParams *sl_params, struct slCalib *sl_calib)
 		}
 	}
 	for(int i=0; i<5; i++) CV_MAT_ELEM(*sl_calib->proj_distortion, float, i, 0) = proj_distortion[i];
-	//cvInitMatHeader(sl_calib->proj_intrinsic, 3, 3, CV_32FC1, proj_intrinsic);
-	//cvInitMatHeader(sl_calib->proj_distortion, 5, 1, CV_32FC1, proj_distortion);
 
 
 	float proj_rotation[9] = { 1, 0, 0, 0, 1, 0, 0, 0, 1};
