@@ -162,7 +162,7 @@ int savePointsVRML(char* filename,
 		for(int c=0; c<points->cols; c++){
 			if(mask == NULL || mask->data.fl[c] != 0){
 				
-				fprintf(pFile, "0 ");
+				fprintf(pFile, "a ");
 				
 				for(int r=0; r<points->rows; r++){
 					if(r != 1)
@@ -272,8 +272,8 @@ void readConfiguration(const char* filename, struct slParams* sl_params){
 
 	sl_params->thresh                  = 45;
 
-	sl_params->dist_range[0]           = (float) -100.0; //cvReadRealByName(fs, m, "minimum_distance_mm",              0.0);
-	sl_params->dist_range[1]           = (float) -60.0;//cvReadRealByName(fs, m, "maximum_distance_mm",            1.0e4);
+	sl_params->dist_range[0]           = (float) -120.0; //cvReadRealByName(fs, m, "minimum_distance_mm",              0.0);
+	sl_params->dist_range[1]           = (float) 10.0;//cvReadRealByName(fs, m, "maximum_distance_mm",            1.0e4);
 	sl_params->dist_reject             = (float) 10.0; //cvReadRealByName(fs, m, "maximum_distance_variation_mm",   10.0);
 	sl_params->background_depth_thresh = (float) 20; //cvReadRealByName(fs, m, "minimum_background_distance_mm",  20.0);
 
