@@ -31,6 +31,9 @@ int runStructuredLight(CvCapture* capture, struct slParams* sl_params, struct sl
 
 int decodeGrayCodes(int proj_width, int proj_height, IplImage**& gray_codes /* by cammera */, IplImage*& decoded_cols, IplImage*& decoded_rows, IplImage*& mask, int& n_cols, int& n_rows, int& col_shift, int& row_shift, int sl_thresh);
 
+int decodeGrayCodes_S(int proj_width, int proj_height, IplImage**& gray_codes /* by cammera */, IplImage*& decoded_cols, IplImage*& decoded_rows, IplImage*& mask, int& n_cols, int& n_rows, int& col_shift, int& row_shift, int sl_thresh);
+
+
 int generateGrayCodes(int width, int height, IplImage**& gray_codes, int& n_cols, int& n_rows, int& col_shift, int& row_shift, bool sl_scan_cols, bool sl_scan_rows);
 
 int generateGrayCodes_S(int width, int height, IplImage**& gray_codes, int& n_cols, int& n_rows, int& col_shift, int& row_shift, bool sl_scan_cols, bool sl_scan_rows);

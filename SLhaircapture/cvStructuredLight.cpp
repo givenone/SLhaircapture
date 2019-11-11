@@ -211,7 +211,22 @@ int main(int argc, char* argv[])
 
 //	save_codes(width, height, proj_gray_codes, gray_ncols, gray_nrows,gray_colshift, gray_rowshift);
 
+	IplImage* cam_gray_codess = new IplImage; char temps [100];
 
+		sprintf(temps, "./800 x 600 : shifting/code_13.png");
+		cam_gray_codess = cvLoadImage(temps); //// TODO : read png files & need to modify array size
+	//IplImage* gray_1      = cvCreateImage(cvSize(800, 600), IPL_DEPTH_8U,  1);
+	//cvCvtColor(cam_gray_codess, gray_1, CV_RGB2GRAY);
+
+    for(int row = 0; row < cam_gray_codess->height; row++)
+    {
+        for(int col = 0; col < cam_gray_codess->width; col++)
+        {
+            printf("%c, ", ((uchar*)(cam_gray_codess->imageData + cam_gray_codess->widthStep*row))[col]);
+        }
+        printf("\n");
+    }
+	printf("%d %d\n",cam_gray_codess->height,cam_gray_codess->widthStep );
 
 	// input calibration
 	struct slParams sl_params; //	configuration
@@ -234,10 +249,10 @@ int main(int argc, char* argv[])
 	// read imange
 
 	IplImage** cam_gray_codes = NULL; char temp [100];
-	cam_gray_codes = new IplImage* [(gray_ncols+gray_nrows+1)];
-	for(int i=0; i<=(gray_ncols+gray_nrows+1); i++)
+	cam_gray_codes = new IplImage* [34];
+	for(int i=1; i<=33/*(gray_ncols+gray_nrows+1)*/; i++)
 	{
-		sprintf(temp, "./Face_6mp_01/800x600/%02d.png", i);
+		sprintf(temp, "./Face_6mp_01/800x600 shifting/%02d.png", i);
 		cam_gray_codes[i] = cvLoadImage(temp); //// TODO : read png files & need to modify array size
 	}		
 
@@ -248,7 +263,14 @@ int main(int argc, char* argv[])
 	IplImage* gray_decoded_cols = cvCreateImage(cvSize(sl_params.cam_w, sl_params.cam_h), IPL_DEPTH_16U, 1);
 	IplImage* gray_decoded_rows = cvCreateImage(cvSize(sl_params.cam_w, sl_params.cam_h), IPL_DEPTH_16U, 1);
 	IplImage* gray_mask = cvCreateImage(cvSize(sl_params.cam_w, sl_params.cam_h), IPL_DEPTH_8U,  1);
-	decodeGrayCodes(sl_params.proj_w, sl_params.proj_h,
+/*	decodeGrayCodes(sl_params.proj_w, sl_params.proj_h,
+					cam_gray_codes, // image read by camera 
+					gray_decoded_cols, gray_decoded_rows, gray_mask,
+					gray_ncols, gray_nrows, 
+					gray_colshift, gray_rowshift, 
+					sl_params.thresh);*/
+
+	decodeGrayCodes_S(sl_params.proj_w, sl_params.proj_h,
 					cam_gray_codes, // image read by camera 
 					gray_decoded_cols, gray_decoded_rows, gray_mask,
 					gray_ncols, gray_nrows, 

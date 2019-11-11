@@ -292,6 +292,111 @@ int decodeGrayCodes(int proj_width, int proj_height,
 	return 0;
 }
 
+// Decode Gray codes.
+int decodeGrayCodes_S(int proj_width, int proj_height,
+					IplImage**& gray_codes, 
+					IplImage*& decoded_cols,
+					IplImage*& decoded_rows,
+					IplImage*& mask,
+					int& n_cols, int& n_rows,
+					int& col_shift, int& row_shift, 
+					int sl_thresh){
+
+	// Extract width and height of images.
+	int cam_width  = gray_codes[0]->width;
+	int cam_height = gray_codes[0]->height;
+
+
+	cout << "cam_width : " << cam_width << endl << "cam_height : " << cam_height << endl;
+
+	// Allocate temporary variables.
+	IplImage* gray_1      = cvCreateImage(cvSize(cam_width, cam_height), IPL_DEPTH_8U,  1);
+	IplImage* gray_2      = cvCreateImage(cvSize(cam_width, cam_height), IPL_DEPTH_8U,  1);
+	IplImage* bit_plane_1 = cvCreateImage(cvSize(cam_width, cam_height), IPL_DEPTH_8U,  1);
+	IplImage* bit_plane_2 = cvCreateImage(cvSize(cam_width, cam_height), IPL_DEPTH_8U,  1);
+	IplImage* temp        = cvCreateImage(cvSize(cam_width, cam_height), IPL_DEPTH_8U,  1);
+	IplImage* thresh_hold = cvCreateImage(cvSize(cam_width, cam_height), IPL_DEPTH_8U,  1);
+
+	// Initialize image mask (indicates reconstructed pixels).
+	cvSet(mask, cvScalar(0));
+
+	cvCvtColor(gray_codes[0], gray_1, CV_RGB2GRAY);
+	cvCvtColor(gray_codes[1], gray_2, CV_RGB2GRAY);
+
+	cout << 1 << endl;
+	cvAbsDiff(gray_1, gray_2, temp);
+	cvCmpS(temp, sl_thresh, temp, CV_CMP_GE);
+	cout << 1.5 << endl;
+	cvOr(temp, mask, mask);
+
+	cout << 2 << endl;
+	cvAdd(gray_1, gray_2, thresh_hold);
+
+	cvSet(temp, cvScalar(2));
+	cvDiv(thresh_hold, temp, thresh_hold); // mean of 2 images.
+
+	cout << 3 << endl;
+	// Decode Gray codes for projector columns.
+	cvZero(decoded_rows);
+	for(int i=0; i<n_rows; i++){
+
+		// Decode bit-plane and update mask.
+		cvCvtColor(gray_codes[i+2], gray_1, CV_RGB2GRAY);
+		cvCmp(gray_1, thresh_hold, bit_plane_2, CV_CMP_GE);
+
+		// Convert from gray code to decimal value.
+		if(i>0)
+			cvXor(bit_plane_1, bit_plane_2, bit_plane_1);
+		else
+			cvCopy(bit_plane_2, bit_plane_1);
+		cvAddS(decoded_rows, cvScalar(pow(2.0,n_rows-i-1)), decoded_rows, bit_plane_1);
+	}
+	cout << 4 << endl;
+	cvSubS(decoded_rows, cvScalar(row_shift), decoded_rows);
+
+	cout << 5 << endl;
+	// Decode Gray codes for projector rows.
+	cvZero(decoded_cols);
+	for(int i=0; i<n_cols; i++){
+
+		// Decode bit-plane and update mask.
+		cvCvtColor(gray_codes[2+n_rows+i], gray_1, CV_RGB2GRAY);
+		cvCmp(gray_1, thresh_hold, bit_plane_2, CV_CMP_GE);
+
+		// Convert from gray code to decimal value.
+		if(i>0)
+			cvXor(bit_plane_1, bit_plane_2, bit_plane_1);
+		else
+			cvCopy(bit_plane_2, bit_plane_1);
+		cvAddS(decoded_cols, cvScalar(pow(2.0,n_cols-i-1)), decoded_cols, bit_plane_1);
+	}
+	cvSubS(decoded_cols, cvScalar(row_shift), decoded_cols);
+	cout << 6 << endl;
+	// Eliminate invalid column/row estimates.
+    // Note: This will exclude pixels if either the column or row is missing or erroneous.
+	cvCmpS(decoded_cols, proj_width-1,  temp, CV_CMP_LE);
+	cvAnd(temp, mask, mask);
+	cvCmpS(decoded_cols, 0,  temp, CV_CMP_GE);
+	cvAnd(temp, mask, mask);
+	cvCmpS(decoded_rows, proj_height-1, temp, CV_CMP_LE);
+	cvAnd(temp, mask, mask);
+	cvCmpS(decoded_rows, 0,  temp, CV_CMP_GE);
+	cvAnd(temp, mask, mask);
+	cvNot(mask, temp);
+	cvSet(decoded_cols, cvScalar(NULL), temp);
+	cvSet(decoded_rows, cvScalar(NULL), temp);
+
+	// Free allocated resources.
+	cvReleaseImage(&gray_1);
+	cvReleaseImage(&gray_2);
+	cvReleaseImage(&bit_plane_1);
+	cvReleaseImage(&bit_plane_2);
+	cvReleaseImage(&temp);
+	cvReleaseImage(&thresh_hold);
+	// Return without errors.
+	return 0;
+}
+
 // Reconstruct the point cloud and the depth map from a structured light sequence.
 int reconstructStructuredLight(struct slParams* sl_params, 
 					           struct slCalib* sl_calib,
