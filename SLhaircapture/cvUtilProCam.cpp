@@ -144,25 +144,22 @@ int savePointsVRML(char* filename,
 		fprintf(stderr,"ERROR: Cannot open VRML file!\n");
 		return -1;
 	}
-//	fprintf(pFile, "#VRML V2.0 utf8\n");
-//	fprintf(pFile, "Shape {\n");
-//	fprintf(pFile, " geometry IndexedFaceSet {\n");
+	fprintf(pFile, "ply\n");
+	fprintf(pFile, "format ascii 1.0\n");
+	fprintf(pFile, "comment made by givenone\n");
 
-	// Output points (i.e., indexed face set vertices).
-	// Note: Flip y-component for compatibility with Java-based viewer.
 	if(points != NULL){
 		int cnt = 0;
 		for(int c=0;c<points->cols; c++){
 			if(mask == NULL || mask->data.fl[c] != 0) cnt++;
 		}
-//		fprintf(pFile, "  coord Coordinate {\n");
-//		fprintf(pFile, "   point [\n");
-		fprintf(pFile, " %d \n", cnt);
-		fprintf(pFile, "points cloud \n");
+		fprintf(pFile, "element vertex %d\n", cnt);		
+		fprintf(pFile, "property float x\nproperty float y\nproperty float z\n");
+		fprintf(pFile, "end_header\n");
 		for(int c=0; c<points->cols; c++){
 			if(mask == NULL || mask->data.fl[c] != 0){
 				
-				fprintf(pFile, "a ");
+				//fprintf(pFile, "a ");
 				
 				for(int r=0; r<points->rows; r++){
 					if(r != 1)
@@ -173,8 +170,6 @@ int savePointsVRML(char* filename,
 				fprintf(pFile, "\n");
 			}
 		}
-//		fprintf(pFile, "   ]\n");
-//		fprintf(pFile, "  }\n");
 	}
 
 	// Output normals (if provided).
@@ -272,10 +267,10 @@ void readConfiguration(const char* filename, struct slParams* sl_params){
 
 	sl_params->thresh                  = 45;
 
-	sl_params->dist_range[0]           = (float) -120.0; //cvReadRealByName(fs, m, "minimum_distance_mm",              0.0);
-	sl_params->dist_range[1]           = (float) 10.0;//cvReadRealByName(fs, m, "maximum_distance_mm",            1.0e4);
+	sl_params->dist_range[0]           = (float) -100.0; //cvReadRealByName(fs, m, "minimum_distance_mm",              0.0);
+	sl_params->dist_range[1]           = (float) 100.0;//cvReadRealByName(fs, m, "maximum_distance_mm",            1.0e4);
 	sl_params->dist_reject             = (float) 10.0; //cvReadRealByName(fs, m, "maximum_distance_variation_mm",   10.0);
-	sl_params->background_depth_thresh = (float) 20; //cvReadRealByName(fs, m, "minimum_background_distance_mm",  20.0);
+	sl_params->background_depth_thresh = (float) 20.0; //cvReadRealByName(fs, m, "minimum_background_distance_mm",  20.0);
 
 	// Enable both row and column scanning, if "ray-ray" reconstruction mode is enabled.
 	if(sl_params->mode == 2){

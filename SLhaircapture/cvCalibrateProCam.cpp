@@ -46,8 +46,10 @@ int evaluateProCamGeometry(struct slParams* sl_params, struct slCalib* sl_calib)
 
 	for(int i=0; i<cam_nelems; i++){
 		CvScalar pd = cvGet1D(cam_undist_points, i);
+
+		//norm이 1에 근사되는 문제 발생 !
 		
-		float norm = (float)sqrt(pow(pd.val[0],2)+pow(pd.val[1],2)+1.0);
+		float norm = (float)sqrt(pow(pd.val[0],2)+pow(pd.val[1],2)+1);
 		sl_calib->cam_rays->data.fl[i]              = (float)pd.val[0]/norm;
 		sl_calib->cam_rays->data.fl[i+  cam_nelems] = (float)pd.val[1]/norm;
 		sl_calib->cam_rays->data.fl[i+2*cam_nelems] = (float)1.0/norm;
@@ -68,7 +70,7 @@ int evaluateProCamGeometry(struct slParams* sl_params, struct slCalib* sl_calib)
 
 	for(int i=0; i<proj_nelems; i++){
 		CvScalar pd = cvGet1D(proj_undist_points, i);
-		float norm = (float)sqrt(pow(pd.val[0],2)+pow(pd.val[1],2)+1.0);
+		float norm = (float)sqrt(pow(pd.val[0],2)+pow(pd.val[1],2)+1);
 		sl_calib->proj_rays->data.fl[i]               = (float)pd.val[0]/norm;
 		sl_calib->proj_rays->data.fl[i+  proj_nelems] = (float)pd.val[1]/norm;
 		sl_calib->proj_rays->data.fl[i+2*proj_nelems] = (float)1.0/norm;
@@ -96,7 +98,7 @@ int evaluateProCamGeometry(struct slParams* sl_params, struct slCalib* sl_calib)
 			int ri = (sl_params->proj_w)*ro+c;
 			for(int i=0; i<3; i++)
 				points->data.fl[3*ro+i] = 
-					sl_calib->proj_center->data.fl[i] + scale*sl_calib->proj_rays->data.fl[ri+proj_nelems*i];
+					sl_calib->proj_center->data.fl[i] + sl_calib->proj_rays->data.fl[ri+proj_nelems*i];
 		}
 		for(int i=0; i<3; i++)
 			points->data.fl[3*sl_params->proj_h+i] = sl_calib->proj_center->data.fl[i];
@@ -109,13 +111,15 @@ int evaluateProCamGeometry(struct slParams* sl_params, struct slCalib* sl_calib)
 
 	// Estimate plane equations describing every projector row.
     // Note: Resulting coefficient vector is in camera coordinate system.
+
+	printMat(sl_calib->proj_center);
 	for(int r=0; r<sl_params->proj_h; r++){
 		CvMat* points = cvCreateMat(sl_params->proj_w+1, 3, CV_32FC1);
 		for(int co=0; co<sl_params->proj_w; co++){
 			int ri = (sl_params->proj_w)*r+co;
 			for(int i=0; i<3; i++)
 				points->data.fl[3*co+i] = 
-					sl_calib->proj_center->data.fl[i] + scale*sl_calib->proj_rays->data.fl[ri+proj_nelems*i];
+					sl_calib->proj_center->data.fl[i] + sl_calib->proj_rays->data.fl[ri+proj_nelems*i];
 		}
 		for(int i=0; i<3; i++)
 			points->data.fl[3*sl_params->proj_w+i] = sl_calib->proj_center->data.fl[i];

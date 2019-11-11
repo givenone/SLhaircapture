@@ -42,7 +42,7 @@ void config(struct slParams *sl_params, struct slCalib *sl_calib)
 	sl_calib->proj_column_planes     = cvCreateMat(sl_params->proj_w, 4, CV_32FC1);
 	sl_calib->proj_row_planes        = cvCreateMat(sl_params->proj_h, 4, CV_32FC1);
 
-	float cam_intrinsic[3][3] = { {6799.891745995248, 0, 1684.663925292664}, {0, 6819.065266606978, 897.2080419838242}, {0, 0, 1}};
+	float cam_intrinsic[3][3] ={ {6799.891745995248, 0, 1684.663925292664}, {0, 6819.065266606978, 897.2080419838242}, {0, 0, 1}};
 	float cam_distortion[5] = { -0.1081234940885747, 1.019777262201034, -0.01496156727613678, 0.007012687213256888, 0};
 
 	for(int i=0; i<3; i++) 
@@ -189,7 +189,7 @@ int save(struct slParams *sl_params, CvMat *depth_map, CvMat *points, CvMat *mas
 
 	// Save the point cloud.
 	printf("Saving the point cloud...\n");
-	sprintf(str, "%s/%s/%s_%0.2d.xyz", sl_params->outdir, sl_params->object, sl_params->object, scanindex);
+	sprintf(str, "%s/%s/%s_%0.2d.ply", sl_params->outdir, sl_params->object, sl_params->object, scanindex);
 	if(savePointsVRML(str, points, NULL, colors, mask)){
 		printf("Scanning was not successful and must be repeated!\n");
 		return -1;
