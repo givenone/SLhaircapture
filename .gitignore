@@ -1,3 +1,5 @@
 *.wrl
 *.xyz
+*.ply
 .vscode/
+
