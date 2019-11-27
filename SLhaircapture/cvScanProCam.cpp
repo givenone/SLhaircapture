@@ -125,7 +125,7 @@ int generateGrayCodes_S(int width, int height,
 	// First, Second is all white and all black
 	int n_cols_s = n_cols - 1; 
 	int n_rows_s = n_rows - 1;
-	gray_codes = new IplImage* [n_cols+n_rows+1];
+	gray_codes = new IplImage* [n_cols_s+n_rows_s+16];
 	for(int i=0; i<(n_cols_s+n_rows_s+ 16); i++)
 		gray_codes[i] = cvCreateImage(cvSize(width,height), IPL_DEPTH_8U, 1);
 	int step = gray_codes[0]->widthStep/sizeof(uchar);
@@ -292,7 +292,8 @@ int decodeGrayCodes(int proj_width, int proj_height,
 	return 0;
 }
 
-// Decode Gray codes.
+
+// Decode Shifting Gray codes.
 int decodeGrayCodes_S(int proj_width, int proj_height,
 					IplImage**& gray_codes, 
 					IplImage*& decoded_cols,
@@ -320,12 +321,13 @@ int decodeGrayCodes_S(int proj_width, int proj_height,
 	// Initialize image mask (indicates reconstructed pixels).
 	cvSet(mask, cvScalar(0));
 
-	cvCvtColor(gray_codes[0], gray_1, CV_RGB2GRAY);
-	cvCvtColor(gray_codes[1], gray_2, CV_RGB2GRAY);
+	cvCvtColor(gray_codes[1], gray_1, CV_RGB2GRAY);
+	cvCvtColor(gray_codes[2], gray_2, CV_RGB2GRAY);
 
 	cout << 1 << endl;
 	cvAbsDiff(gray_1, gray_2, temp);
 	cvCmpS(temp, sl_thresh, temp, CV_CMP_GE);
+
 	cout << 1.5 << endl;
 	cvOr(temp, mask, mask);
 
@@ -336,12 +338,12 @@ int decodeGrayCodes_S(int proj_width, int proj_height,
 	cvDiv(thresh_hold, temp, thresh_hold); // mean of 2 images.
 
 	cout << 3 << endl;
-	// Decode Gray codes for projector columns.
+	// Decode Gray codes for projector rows.
 	cvZero(decoded_rows);
-	for(int i=0; i<n_rows; i++){
-
+	for(int i=0; i<n_rows-2; i++){
 		// Decode bit-plane and update mask.
-		cvCvtColor(gray_codes[i+2], gray_1, CV_RGB2GRAY);
+
+		cvCvtColor(gray_codes[i+3], gray_1, CV_RGB2GRAY);
 		cvCmp(gray_1, thresh_hold, bit_plane_2, CV_CMP_GE);
 
 		// Convert from gray code to decimal value.
@@ -351,11 +353,22 @@ int decodeGrayCodes_S(int proj_width, int proj_height,
 			cvCopy(bit_plane_2, bit_plane_1);
 		cvAddS(decoded_rows, cvScalar(pow(2.0,n_rows-i-1)), decoded_rows, bit_plane_1);
 	}
+	// TODO :: Sine fitting -> figure out which point is which projector strip (not just by thresholding!)
+	/// TODO :: Sine fitting -> figure out which point is which projector strip (not just by thresholding!)
+	IplImage* delta[4]; // difference
+	for(int i=0; i<4; i++) 
+	{
+		delta[i] = cvCreateImage(cvSize(cam_width, cam_height), IPL_DEPTH_8U,  1);
+		cvCvtColor(gray_codes[i+11], gray_1, CV_RGB2GRAY);
+		cvCvtColor(gray_codes[i+15], gray_2, CV_RGB2GRAY);
+		cvSub(gray_1, gray_2, delta[i]);
+	}
+
 	cout << 4 << endl;
 	cvSubS(decoded_rows, cvScalar(row_shift), decoded_rows);
 
 	cout << 5 << endl;
-	// Decode Gray codes for projector rows.
+	// Decode Gray codes for projector cols.
 	cvZero(decoded_cols);
 	for(int i=0; i<n_cols; i++){
 

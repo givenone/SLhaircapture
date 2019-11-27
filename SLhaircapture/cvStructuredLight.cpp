@@ -129,11 +129,13 @@ void save_codes(int width, int height, IplImage**& proj_gray_codes, int& gray_nc
 		gray_ncols, gray_nrows, gray_colshift, gray_rowshift, 
 		true , true);
 
+	cout <<  gray_ncols <<' '<<gray_nrows << endl;
 	sprintf(dir, "%d x %d : shifting", width, height);
 	mkdir(dir, 0776);
 
 	for(int i=0; i<=(gray_ncols+gray_nrows+12); i++)
 	{
+		cout << i;
 		sprintf(buf2, "%s/code_%d.png", dir, i);
 		cvSaveImage(buf2, proj_gray_codes_S[i]);
 		cvReleaseImage(&proj_gray_codes_S[i]);
@@ -204,35 +206,17 @@ int main(int argc, char* argv[])
 	IplImage** proj_gray_codes = NULL;
 	int gray_ncols, gray_nrows, gray_colshift, gray_rowshift;
 
-	int width = 800; int height = 600;
+	int width = 1280; int height = 720;
 
 	generateGrayCodes(width, height, proj_gray_codes, gray_ncols, gray_nrows, gray_colshift, gray_rowshift, 
 		true , true);
 
-//	save_codes(width, height, proj_gray_codes, gray_ncols, gray_nrows,gray_colshift, gray_rowshift);
-
-	IplImage* cam_gray_codess = new IplImage; char temps [100];
-
-		sprintf(temps, "./800 x 600 : shifting/code_13.png");
-		cam_gray_codess = cvLoadImage(temps); //// TODO : read png files & need to modify array size
-	//IplImage* gray_1      = cvCreateImage(cvSize(800, 600), IPL_DEPTH_8U,  1);
-	//cvCvtColor(cam_gray_codess, gray_1, CV_RGB2GRAY);
-
-    for(int row = 0; row < cam_gray_codess->height; row++)
-    {
-        for(int col = 0; col < cam_gray_codess->width; col++)
-        {
-            printf("%c, ", ((uchar*)(cam_gray_codess->imageData + cam_gray_codess->widthStep*row))[col]);
-        }
-        printf("\n");
-    }
-	printf("%d %d\n",cam_gray_codess->height,cam_gray_codess->widthStep );
-
+	save_codes(width, height, proj_gray_codes, gray_ncols, gray_nrows,gray_colshift, gray_rowshift);
 	// input calibration
 	struct slParams sl_params; //	configuration
 	struct slCalib sl_calib; //	calibration
 	
-	readConfiguration(NULL, &sl_params);	
+/*	readConfiguration(NULL, &sl_params);	
 		// Allocate storage for calibration parameters.
 	config(&sl_params, &sl_calib);
 
@@ -250,9 +234,9 @@ int main(int argc, char* argv[])
 
 	IplImage** cam_gray_codes = NULL; char temp [100];
 	cam_gray_codes = new IplImage* [34];
-	for(int i=1; i<=33/*(gray_ncols+gray_nrows+1)*/; i++)
+	for(int i=0; i<=(gray_ncols+gray_nrows+1); i++)
 	{
-		sprintf(temp, "./Face_6mp_01/800x600 shifting/%02d.png", i);
+		sprintf(temp, "./Face_6mp_01/800x600/%02d.png", i);
 		cam_gray_codes[i] = cvLoadImage(temp); //// TODO : read png files & need to modify array size
 	}		
 
@@ -263,12 +247,12 @@ int main(int argc, char* argv[])
 	IplImage* gray_decoded_cols = cvCreateImage(cvSize(sl_params.cam_w, sl_params.cam_h), IPL_DEPTH_16U, 1);
 	IplImage* gray_decoded_rows = cvCreateImage(cvSize(sl_params.cam_w, sl_params.cam_h), IPL_DEPTH_16U, 1);
 	IplImage* gray_mask = cvCreateImage(cvSize(sl_params.cam_w, sl_params.cam_h), IPL_DEPTH_8U,  1);
-/*	decodeGrayCodes(sl_params.proj_w, sl_params.proj_h,
+	decodeGrayCodes(sl_params.proj_w, sl_params.proj_h,
 					cam_gray_codes, // image read by camera 
 					gray_decoded_cols, gray_decoded_rows, gray_mask,
 					gray_ncols, gray_nrows, 
 					gray_colshift, gray_rowshift, 
-					sl_params.thresh);*/
+					sl_params.thresh);
 
 	decodeGrayCodes_S(sl_params.proj_w, sl_params.proj_h,
 					cam_gray_codes, // image read by camera 
@@ -300,7 +284,7 @@ int main(int argc, char* argv[])
 
 	// Create output directory (if output enabled).
 	save(&sl_params, depth_map, points, mask, colors, cam_gray_codes);
-
+*/
 	return 0;
     
 }
