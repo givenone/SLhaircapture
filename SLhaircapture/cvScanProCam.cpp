@@ -292,7 +292,10 @@ int decodeGrayCodes(int proj_width, int proj_height,
 	return 0;
 }
 
-
+//Take the DFT of your signal (remember about proper scaling of values).
+//Find the dominant frequency f0 and its amplitude A at magnitude spectrum.
+//From phase spectrum find the corresponding phase shift θ for this given frequency - usually it is given in radians.
+//Reconstruct your signal as: x(t)=Asin(2πf0t+θ)
 // Decode Shifting Gray codes.
 int decodeGrayCodes_S(int proj_width, int proj_height,
 					IplImage**& gray_codes, 

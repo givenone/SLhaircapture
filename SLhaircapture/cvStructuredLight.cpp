@@ -206,17 +206,17 @@ int main(int argc, char* argv[])
 	IplImage** proj_gray_codes = NULL;
 	int gray_ncols, gray_nrows, gray_colshift, gray_rowshift;
 
-	int width = 1280; int height = 720;
+	int width = 800; int height = 600;
 
 	generateGrayCodes(width, height, proj_gray_codes, gray_ncols, gray_nrows, gray_colshift, gray_rowshift, 
 		true , true);
 
-	save_codes(width, height, proj_gray_codes, gray_ncols, gray_nrows,gray_colshift, gray_rowshift);
+//	save_codes(width, height, proj_gray_codes, gray_ncols, gray_nrows,gray_colshift, gray_rowshift);
 	// input calibration
 	struct slParams sl_params; //	configuration
 	struct slCalib sl_calib; //	calibration
 	
-/*	readConfiguration(NULL, &sl_params);	
+	readConfiguration(NULL, &sl_params);	
 		// Allocate storage for calibration parameters.
 	config(&sl_params, &sl_calib);
 
@@ -254,13 +254,13 @@ int main(int argc, char* argv[])
 					gray_colshift, gray_rowshift, 
 					sl_params.thresh);
 
-	decodeGrayCodes_S(sl_params.proj_w, sl_params.proj_h,
+	/*decodeGrayCodes_S(sl_params.proj_w, sl_params.proj_h,
 					cam_gray_codes, // image read by camera 
 					gray_decoded_cols, gray_decoded_rows, gray_mask,
 					gray_ncols, gray_nrows, 
 					gray_colshift, gray_rowshift, 
 					sl_params.thresh);
-	
+	*/
 	// display result
 	cout << "Succesfully decoded gray codes" << endl;
 
@@ -284,7 +284,7 @@ int main(int argc, char* argv[])
 
 	// Create output directory (if output enabled).
 	save(&sl_params, depth_map, points, mask, colors, cam_gray_codes);
-*/
+
 	return 0;
     
 }

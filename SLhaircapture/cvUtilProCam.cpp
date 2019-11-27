@@ -93,6 +93,7 @@ void intersectLineWithPlane3D(const float* q,
 	for(int i=0; i<3; i++)
 		p[i] = q[i] + depth*v[i];
 
+	//printf("%f ",depth);
 	//printf("%f\n", depth);
 	//printf("%f %f %f, %f %f %f,// %f %f %f,%f\n", q[0], q[1], q[2], v[0], v[1], v[2], w[0], w[1], w[2], w[3]);
 	//printf("%f %f %f\n", p[0], p[1], p[2]);
@@ -267,8 +268,8 @@ void readConfiguration(const char* filename, struct slParams* sl_params){
 
 	sl_params->thresh                  = 30;
 
-	sl_params->dist_range[0]           = (float) -100.0; //cvReadRealByName(fs, m, "minimum_distance_mm",              0.0);
-	sl_params->dist_range[1]           = (float) 20.0;//cvReadRealByName(fs, m, "maximum_distance_mm",            1.0e4);
+	sl_params->dist_range[0]           = (float) -200.0; //cvReadRealByName(fs, m, "minimum_distance_mm",              0.0);
+	sl_params->dist_range[1]           = (float) 0.0;//cvReadRealByName(fs, m, "maximum_distance_mm",            1.0e4);
 	sl_params->dist_reject             = (float) 10.0; //cvReadRealByName(fs, m, "maximum_distance_variation_mm",   10.0);
 	sl_params->background_depth_thresh = (float) 20.0; //cvReadRealByName(fs, m, "minimum_background_distance_mm",  20.0);
 
