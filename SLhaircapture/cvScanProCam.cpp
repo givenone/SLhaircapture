@@ -212,7 +212,6 @@ int decodeGrayCodes(int proj_width, int proj_height,
 	IplImage* temp        = cvCreateImage(cvSize(cam_width, cam_height), IPL_DEPTH_8U,  1);
 	IplImage* thresh_hold = cvCreateImage(cvSize(cam_width, cam_height), IPL_DEPTH_8U,  1);
 
-	// Initialize image mask (indicates reconstructed pixels).
 	cvSet(mask, cvScalar(0));
 
 	cvCvtColor(gray_codes[0], gray_1, CV_RGB2GRAY);
@@ -220,6 +219,85 @@ int decodeGrayCodes(int proj_width, int proj_height,
 
 	cout << 1 << endl;
 	cvAbsDiff(gray_1, gray_2, temp);
+	cvCmpS(temp, sl_thresh, temp, CV_CMP_GE);
+	cout << 1.5 << endl;
+	cvOr(temp, mask, mask);
+	
+	cout << n_cols << ' '<< n_rows << endl;
+
+	// Decode Gray codes for projector columns.
+	cvZero(decoded_cols);
+	for(int i=0; i<n_cols; i++){
+
+		// Decode bit-plane and update mask.
+		cvCvtColor(gray_codes[2*(i+1)],   gray_1, CV_RGB2GRAY);
+		cvCvtColor(gray_codes[2*(i+1)+1], gray_2, CV_RGB2GRAY);
+		cvAbsDiff(gray_1, gray_2, temp);
+		cvCmpS(temp, sl_thresh, temp, CV_CMP_GE);
+		
+		//cvOr(temp, mask, mask);
+
+		cvCmp(gray_1, gray_2, bit_plane_2, CV_CMP_GE);
+		
+		// Convert from gray code to decimal value.
+		if(i>0)
+			cvXor(bit_plane_1, bit_plane_2, bit_plane_1);
+		else
+			cvCopy(bit_plane_2, bit_plane_1);
+		cvAddS(decoded_cols, cvScalar(pow(2.0,n_cols-i-1)), decoded_cols, bit_plane_1);
+	}
+	cvSubS(decoded_cols, cvScalar(col_shift), decoded_cols);
+
+	// Decode Gray codes for projector rows.
+	cvZero(decoded_rows);
+	for(int i=0; i<n_rows; i++){
+
+		// Decode bit-plane and update mask.
+		cvCvtColor(gray_codes[2*(i+n_cols+1)],   gray_1, CV_RGB2GRAY);
+		cvCvtColor(gray_codes[2*(i+n_cols+1)+1], gray_2, CV_RGB2GRAY);
+		cvAbsDiff(gray_1, gray_2, temp);
+		cvCmpS(temp, sl_thresh, temp, CV_CMP_GE);
+		//cvOr(temp, mask, mask);
+		cvCmp(gray_1, gray_2, bit_plane_2, CV_CMP_GE);
+
+		// Convert from gray code to decimal value.
+		if(i>0)
+			cvXor(bit_plane_1, bit_plane_2, bit_plane_1);
+		else
+			cvCopy(bit_plane_2, bit_plane_1);
+		cvAddS(decoded_rows, cvScalar(pow(2.0,n_rows-i-1)), decoded_rows, bit_plane_1);
+	}
+	cvSubS(decoded_rows, cvScalar(row_shift), decoded_rows);
+
+	// Eliminate invalid column/row estimates.
+    // Note: This will exclude pixels if either the column or row is missing or erroneous.
+	cvCmpS(decoded_cols, proj_width-1,  temp, CV_CMP_LE);
+	cvAnd(temp, mask, mask);
+	cvCmpS(decoded_cols, 0,  temp, CV_CMP_GE);
+	cvAnd(temp, mask, mask);
+	cvCmpS(decoded_rows, proj_height-1, temp, CV_CMP_LE);
+	cvAnd(temp, mask, mask);
+	cvCmpS(decoded_rows, 0,  temp, CV_CMP_GE);
+	cvAnd(temp, mask, mask);
+	cvNot(mask, temp);
+	cvSet(decoded_cols, cvScalar(NULL), temp);
+	cvSet(decoded_rows, cvScalar(NULL), temp);
+
+	// Free allocated resources.
+	cvReleaseImage(&gray_1);
+	cvReleaseImage(&gray_2);
+	cvReleaseImage(&bit_plane_1);
+	cvReleaseImage(&bit_plane_2);
+	cvReleaseImage(&temp);
+	// Initialize image mask (indicates reconstructed pixels).
+/*cvSet(mask, cvScalar(0));
+
+	cvCvtColor(gray_codes[0], gray_1, CV_RGB2GRAY);
+	cvCvtColor(gray_codes[1], gray_2, CV_RGB2GRAY);
+
+	cout << 1 << endl;
+	cvAbsDiff(gray_1, gray_2, temp);
+
 	cvCmpS(temp, sl_thresh, temp, CV_CMP_GE);
 	cout << 1.5 << endl;
 	cvOr(temp, mask, mask);
@@ -267,6 +345,24 @@ int decodeGrayCodes(int proj_width, int proj_height,
 	}
 	cvSubS(decoded_cols, cvScalar(row_shift), decoded_cols);
 	cout << 6 << endl;
+
+	char file [100];
+	sprintf(file, "decoded.txt");
+	cvSave(file, decoded_rows);
+
+	IplImage* depth_map_image = cvCreateImage(cvSize(cam_width, cam_height), IPL_DEPTH_8U, 1);
+		for(int r=0; r<cam_width; r++){
+			for(int c=0; c<cam_height; c++){
+				char* depth_map_image_data = (char*)(depth_map_image->imageData + r*depth_map_image->widthStep);
+				depth_map_image_data[c] = 
+					255-int(255*(decoded_rows->imageData[cam_width*r+c])/(800));
+			}
+		}
+
+	char str[1024];
+	sprintf(str, "decoded.png");
+	cvSaveImage(str, depth_map_image);
+
 	// Eliminate invalid column/row estimates.
     // Note: This will exclude pixels if either the column or row is missing or erroneous.
 	cvCmpS(decoded_cols, proj_width-1,  temp, CV_CMP_LE);
@@ -288,7 +384,7 @@ int decodeGrayCodes(int proj_width, int proj_height,
 	cvReleaseImage(&bit_plane_2);
 	cvReleaseImage(&temp);
 	cvReleaseImage(&thresh_hold);
-	// Return without errors.
+	// Return without errors.*/
 	return 0;
 }
 

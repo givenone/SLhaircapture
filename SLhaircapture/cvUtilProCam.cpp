@@ -233,12 +233,12 @@ void readConfiguration(const char* filename, struct slParams* sl_params){
 	sl_params->save = true;
 
 	// Read camera parameters.
-	sl_params->cam_w         =  2048;
-	sl_params->cam_h         =  3072;
+	sl_params->cam_w         =  3072;
+	sl_params->cam_h         =  2048;
 
 	// Read projector parameters.
-	sl_params->proj_w      = 600;
-	sl_params->proj_h      = 800;
+	sl_params->proj_w      = 800;//600;
+	sl_params->proj_h      = 600;//800;
 //	sl_params->proj_invert = false;
 
 	// Read camera and projector gain parameters.
@@ -263,13 +263,13 @@ void readConfiguration(const char* filename, struct slParams* sl_params){
 
 	// **** mode 1이면 ray-plane or ray-ray 2이면 ray-ray
 	sl_params->mode                    =  1;      // cvReadIntByName(fs,  m, "mode",                               2);
-	sl_params->scan_cols               =  false; //      (cvReadIntByName(fs,  m, "reconstruct_columns",                1) != 0);
-	sl_params->scan_rows               =  true; //      (cvReadIntByName(fs,  m, "reconstruct_rows",                   1) != 0);
+	sl_params->scan_cols               =  true; //      (cvReadIntByName(fs,  m, "reconstruct_columns",                1) != 0);
+	sl_params->scan_rows               =  false; //      (cvReadIntByName(fs,  m, "reconstruct_rows",                   1) != 0);
 
-	sl_params->thresh                  = 30;
+	sl_params->thresh                  = 50;
 
 	sl_params->dist_range[0]           = (float) -200.0; //cvReadRealByName(fs, m, "minimum_distance_mm",              0.0);
-	sl_params->dist_range[1]           = (float) 0.0;//cvReadRealByName(fs, m, "maximum_distance_mm",            1.0e4);
+	sl_params->dist_range[1]           = (float) 200.0;//cvReadRealByName(fs, m, "maximum_distance_mm",            1.0e4);
 	sl_params->dist_reject             = (float) 10.0; //cvReadRealByName(fs, m, "maximum_distance_variation_mm",   10.0);
 	sl_params->background_depth_thresh = (float) 20.0; //cvReadRealByName(fs, m, "minimum_background_distance_mm",  20.0);
 
