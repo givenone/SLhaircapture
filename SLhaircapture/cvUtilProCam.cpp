@@ -266,9 +266,9 @@ void readConfiguration(const char* filename, struct slParams* sl_params){
 	sl_params->scan_cols               =  true; //      (cvReadIntByName(fs,  m, "reconstruct_columns",                1) != 0);
 	sl_params->scan_rows               =  false; //      (cvReadIntByName(fs,  m, "reconstruct_rows",                   1) != 0);
 
-	sl_params->thresh                  = 10;
+	sl_params->thresh                  = 2;
 
-	sl_params->dist_range[0]           = (float) -1000.0; //cvReadRealByName(fs, m, "minimum_distance_mm",              0.0);
+	sl_params->dist_range[0]           = (float) -900.0; //cvReadRealByName(fs, m, "minimum_distance_mm",              0.0);
 	sl_params->dist_range[1]           = (float) -600.0;//cvReadRealByName(fs, m, "maximum_distance_mm",            1.0e4);
 	sl_params->dist_reject             = (float) 10.0; //cvReadRealByName(fs, m, "maximum_distance_variation_mm",   10.0);
 	sl_params->background_depth_thresh = (float) 20.0; //cvReadRealByName(fs, m, "minimum_background_distance_mm",  20.0);

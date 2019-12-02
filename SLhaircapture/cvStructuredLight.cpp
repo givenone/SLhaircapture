@@ -148,7 +148,7 @@ void save_codes(int width, int height, IplImage**& proj_gray_codes, int& gray_nc
 int save(struct slParams *sl_params, CvMat *depth_map, CvMat *points, CvMat *mask, CvMat *colors, IplImage **cam_gray_codes)
 {
 	
-	char str[1024], outputDir[1024]; int scanindex = 1;
+	char str[1024], outputDir[1024]; int scanindex = 3;
 	if(sl_params->save){
 
 		sprintf(outputDir, "%s", sl_params->outdir);
@@ -187,7 +187,7 @@ int save(struct slParams *sl_params, CvMat *depth_map, CvMat *points, CvMat *mas
 	// Save the texture map.
 	printf("Saving the texture map...\n");
 	sprintf(str, "%s/%s/%s_%0.2d.png", sl_params->outdir, sl_params->object, sl_params->object, scanindex);
-	cvSaveImage(str, cam_gray_codes[0]);
+	//cvSaveImage(str, cam_gray_codes[0]);
 
 	// Save the point cloud.
 	printf("Saving the point cloud...\n");
@@ -237,7 +237,7 @@ int main(int argc, char* argv[])
 	cout << gray_ncols << ' ' << gray_nrows <<endl;
 	for(int i=0; i<2*(gray_ncols+gray_nrows+1); i++)
 	{
-		sprintf(temp, "./Hair/inverse_pattern_lighten/%d.bmp", i);
+		sprintf(temp, "./Hair/inverse_pattern/%d.bmp", i);
 		//sprintf(temp, "./Face_6mp_01/800x600/%02d.png", i);
 		cam_gray_codes[i] = cvLoadImage(temp); //// TODO : read png files & need to modify array size
 	}		
