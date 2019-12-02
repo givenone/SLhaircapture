@@ -200,8 +200,22 @@ int save(struct slParams *sl_params, CvMat *depth_map, CvMat *points, CvMat *mas
 
 int main(int argc, char* argv[])
 {
+	if(argc == 1)
+	{
+		no_shfiting();
+	}
+	else
+	{
+		shifting();
+	}
+	
+	return 0;
+    
+}
 
-    cout << "hi" <<endl;
+void no_shfiting()
+{
+	cout << "hi" <<endl;
 
 	IplImage** proj_gray_codes = NULL;
 	int gray_ncols, gray_nrows, gray_colshift, gray_rowshift;
@@ -212,19 +226,19 @@ int main(int argc, char* argv[])
 		true , true);
 
 //	save_codes(width, height, proj_gray_codes, gray_ncols, gray_nrows,gray_colshift, gray_rowshift);
+	
 	// input calibration
 	struct slParams sl_params; //	configuration
 	struct slCalib sl_calib; //	calibration
 	
+	// Allocate storage for calibration parameters.
 	readConfiguration(NULL, &sl_params);	
-		// Allocate storage for calibration parameters.
+	
 	config(&sl_params, &sl_calib);
 
 	evaluateProCamGeometry(&sl_params, &sl_calib); 
 
 	cout << "evaluated Projector Camera Geometry" << endl;
-
-	//	프로젝터가 원점 ! -> no extrinsic value
 
 	// Initialize background model.
 
@@ -239,7 +253,7 @@ int main(int argc, char* argv[])
 	{
 		sprintf(temp, "./Hair/inverse_pattern/%d.bmp", i);
 		//sprintf(temp, "./Face_6mp_01/800x600/%02d.png", i);
-		cam_gray_codes[i] = cvLoadImage(temp); //// TODO : read png files & need to modify array size
+		cam_gray_codes[i] = cvLoadImage(temp);
 	}		
 
 	cout << "Successfully read all images" << endl;
@@ -256,18 +270,7 @@ int main(int argc, char* argv[])
 					gray_colshift, gray_rowshift, 
 					sl_params.thresh);
 	
-	
-	/*decodeGrayCodes_S(sl_params.proj_w, sl_params.proj_h,
-					cam_gray_codes, // image read by camera 
-					gray_decoded_cols, gray_decoded_rows, gray_mask,
-					gray_ncols, gray_nrows, 
-					gray_colshift, gray_rowshift, 
-					sl_params.thresh);
-	*/
-	// display result
 	cout << "Succesfully decoded gray codes" << endl;
-
-	//	displayDecodingResults(gray_decoded_cols, gray_decoded_rows, gray_mask, sl_params);
 
 	// reconstruction
 
@@ -282,13 +285,91 @@ int main(int argc, char* argv[])
 							   points, colors, depth_map, mask);
 
 	cout << "finished reconstruction !" << endl;
-	// display depth map
-	//	displayDepthMap(depth_map, gray_mask, &sl_params);
+
+	// Create output directory and save
+	save(&sl_params, depth_map, points, mask, colors, cam_gray_codes);
+}
+
+void shifting()
+{
+	cout << "hi :: this is shiting-based decoding" <<endl;
+
+	IplImage** proj_gray_codes = NULL;
+	int gray_ncols, gray_nrows, gray_colshift, gray_rowshift;
+
+	int width = 800; int height = 600;
+
+	generateGrayCodes(width, height, proj_gray_codes, gray_ncols, gray_nrows, gray_colshift, gray_rowshift, 
+		true , true);
+
+//	save_codes(width, height, proj_gray_codes, gray_ncols, gray_nrows,gray_colshift, gray_rowshift);
+
+	// input calibration
+	struct slParams sl_params; //	configuration
+	struct slCalib sl_calib; //	calibration
+	
+	// Allocate storage for calibration parameters.
+	readConfiguration(NULL, &sl_params);	
+		
+	config(&sl_params, &sl_calib);
+
+	evaluateProCamGeometry(&sl_params, &sl_calib); 
+
+	cout << "evaluated Projector Camera Geometry" << endl;
+
+	// Initialize background model.
+
+	initialize_background(&sl_params, &sl_calib);
+	
+	// read imange
+
+	IplImage** cam_gray_codes = NULL; char temp [100];
+	cam_gray_codes = new IplImage* [2 * gray_ncols + 6];
+	cout << gray_ncols << ' ' << gray_nrows <<endl;
+
+	for(int i=0; i<2 * gray_ncols - 2; i++)
+	{
+		sprintf(temp, "./Hair/shifting_revised/%d.bmp", i);
+		cam_gray_codes[i] = cvLoadImage(temp);
+	}		
+
+	for(int i= 1; i <= 8 ; i++)
+	{
+		sprintf(temp, "./Hair/shifting_revised/shift_%d.bmp", i);
+		cam_gray_codes[i + 2 * gray_ncols - 3] = cvLoadImage(temp);
+	}
+
+	cout << "Successfully read all images" << endl;
+
+	// Decode gray codes
+
+	IplImage* gray_decoded_cols = cvCreateImage(cvSize(sl_params.cam_w, sl_params.cam_h), IPL_DEPTH_16U, 1);
+	IplImage* gray_decoded_rows = cvCreateImage(cvSize(sl_params.cam_w, sl_params.cam_h), IPL_DEPTH_16U, 1);
+	IplImage* gray_mask = cvCreateImage(cvSize(sl_params.cam_w, sl_params.cam_h), IPL_DEPTH_8U,  1);
+	
+	decodeGrayCodes_S(sl_params.proj_w, sl_params.proj_h,
+					cam_gray_codes, // image read by camera 
+					gray_decoded_cols, gray_decoded_rows, gray_mask,
+					gray_ncols, gray_nrows, 
+					gray_colshift, gray_rowshift, 
+					sl_params.thresh);
+	
+	cout << "Succesfully decoded gray codes" << endl;
+
+	// reconstruction
+	printf("Reconstructing the point cloud and the depth map...\n");
+	CvMat *points  = cvCreateMat(3, sl_params.cam_h*sl_params.cam_w, CV_32FC1);
+	CvMat *colors  = cvCreateMat(3, sl_params.cam_h*sl_params.cam_w, CV_32FC1);
+	CvMat *depth_map = cvCreateMat(sl_params.cam_h, sl_params.cam_w, CV_32FC1);
+	CvMat *mask    = cvCreateMat(1, sl_params.cam_h*sl_params.cam_w, CV_32FC1);
+	reconstructStructuredLight(&sl_params, &sl_calib, 
+							   cam_gray_codes[1],
+		                       gray_decoded_cols, gray_decoded_rows, gray_mask,
+							   points, colors, depth_map, mask);
+
+	cout << "finished reconstruction !" << endl;
 
 	// Create output directory (if output enabled).
 	save(&sl_params, depth_map, points, mask, colors, cam_gray_codes);
-
-	return 0;
-    
 }
 

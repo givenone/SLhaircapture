@@ -406,7 +406,6 @@ int decodeGrayCodes_S(int proj_width, int proj_height,
 	int cam_width  = gray_codes[0]->width;
 	int cam_height = gray_codes[0]->height;
 
-
 	cout << "cam_width : " << cam_width << endl << "cam_height : " << cam_height << endl;
 
 	// Allocate temporary variables.
@@ -417,64 +416,86 @@ int decodeGrayCodes_S(int proj_width, int proj_height,
 	IplImage* temp        = cvCreateImage(cvSize(cam_width, cam_height), IPL_DEPTH_8U,  1);
 	IplImage* thresh_hold = cvCreateImage(cvSize(cam_width, cam_height), IPL_DEPTH_8U,  1);
 
-	// Initialize image mask (indicates reconstructed pixels).
 	cvSet(mask, cvScalar(0));
 
-	cvCvtColor(gray_codes[1], gray_1, CV_RGB2GRAY);
-	cvCvtColor(gray_codes[2], gray_2, CV_RGB2GRAY);
+	cvCvtColor(gray_codes[0], gray_1, CV_RGB2GRAY);
+	cvCvtColor(gray_codes[1], gray_2, CV_RGB2GRAY);
 
 	cout << 1 << endl;
 	cvAbsDiff(gray_1, gray_2, temp);
 	cvCmpS(temp, sl_thresh, temp, CV_CMP_GE);
-
 	cout << 1.5 << endl;
 	cvOr(temp, mask, mask);
+	
+	cout << n_cols << ' '<< n_rows << endl;
 
-	cout << 2 << endl;
-	cvAdd(gray_1, gray_2, thresh_hold);
-
-	cvSet(temp, cvScalar(2));
-	cvDiv(thresh_hold, temp, thresh_hold); // mean of 2 images.
-
-	cout << 3 << endl;
-	// Decode Gray codes for projector rows.
-	cvZero(decoded_rows);
-	for(int i=0; i<n_rows-2; i++){
-		// Decode bit-plane and update mask.
-
-		cvCvtColor(gray_codes[i+3], gray_1, CV_RGB2GRAY);
-		cvCmp(gray_1, thresh_hold, bit_plane_2, CV_CMP_GE);
-
-		// Convert from gray code to decimal value.
-		if(i>0)
-			cvXor(bit_plane_1, bit_plane_2, bit_plane_1);
-		else
-			cvCopy(bit_plane_2, bit_plane_1);
-		cvAddS(decoded_rows, cvScalar(pow(2.0,n_rows-i-1)), decoded_rows, bit_plane_1);
-	}
 	// TODO :: Sine fitting -> figure out which point is which projector strip (not just by thresholding!)
-	/// TODO :: Sine fitting -> figure out which point is which projector strip (not just by thresholding!)
+
 	IplImage* delta[4]; // difference
 	for(int i=0; i<4; i++) 
 	{
 		delta[i] = cvCreateImage(cvSize(cam_width, cam_height), IPL_DEPTH_8U,  1);
-		cvCvtColor(gray_codes[i+11], gray_1, CV_RGB2GRAY);
-		cvCvtColor(gray_codes[i+15], gray_2, CV_RGB2GRAY);
-		cvSub(gray_1, gray_2, delta[i]);
+		cvCvtColor(gray_codes[i+2*n_cols-2], gray_1, CV_RGB2GRAY);
+		cvCvtColor(gray_codes[i+2*n_cols+2], gray_2, CV_RGB2GRAY);
+		cvSub(gray_1, gray_2, delta[i]); // "0" for negative values.
+		char str[1024];
+		sprintf(str, "diff_%d.png", i);
+		cvSaveImage(str, delta[i]);
+		printf("saved %d image", i);
 	}
 
-	cout << 4 << endl;
-	cvSubS(decoded_rows, cvScalar(row_shift), decoded_rows);
 
-	cout << 5 << endl;
-	// Decode Gray codes for projector cols.
-	cvZero(decoded_cols);
+	int diff[4];
+	char* data[4];
+	int *answer = new int[cam_height * cam_width];
+
+	for(int r=0; r<cam_height; r++)
+	{
+		bool sign[4];
+		for(int i=0; i<4; i++) 	
+		{
+			data[i] = (char*)(delta[i]->imageData + r*delta[i]->widthStep);
+			sign[i] = (int)data[i][0] == 0 ? true : false;
+		}
+		for(int c=0; c<cam_width; c++)
+		{
+			for(int i=0; i<4; i++) 
+			{
+				if( (int)data[i][c] > 0 )
+				{
+					if(sign[i]) // 0 -> +
+					{
+						sign[i] = false;
+						answer[r * cam_width + c] = i+1; 
+					}
+				}
+				else
+				{
+					if(!sign[i]) // + -> 0
+					{
+						sign[i] = true;
+						answer[r * cam_width + c] = i+5;
+					}
+				}
+			}
+			printf("%d ", answer[r * cam_width + c]); 
+		}
+		printf("\n\n");
+	}
+	// Decode Gray codes for projector columns.
+/*	cvZero(decoded_cols);
 	for(int i=0; i<n_cols; i++){
 
 		// Decode bit-plane and update mask.
-		cvCvtColor(gray_codes[2+n_rows+i], gray_1, CV_RGB2GRAY);
-		cvCmp(gray_1, thresh_hold, bit_plane_2, CV_CMP_GE);
+		cvCvtColor(gray_codes[2*(i+1)],   gray_1, CV_RGB2GRAY);
+		cvCvtColor(gray_codes[2*(i+1)+1], gray_2, CV_RGB2GRAY);
+		cvAbsDiff(gray_1, gray_2, temp);
+		cvCmpS(temp, sl_thresh, temp, CV_CMP_GE);
+		
+		//cvOr(temp, mask, mask);
 
+		cvCmp(gray_1, gray_2, bit_plane_2, CV_CMP_GE);
+		
 		// Convert from gray code to decimal value.
 		if(i>0)
 			cvXor(bit_plane_1, bit_plane_2, bit_plane_1);
@@ -482,8 +503,10 @@ int decodeGrayCodes_S(int proj_width, int proj_height,
 			cvCopy(bit_plane_2, bit_plane_1);
 		cvAddS(decoded_cols, cvScalar(pow(2.0,n_cols-i-1)), decoded_cols, bit_plane_1);
 	}
-	cvSubS(decoded_cols, cvScalar(row_shift), decoded_cols);
-	cout << 6 << endl;
+	cvSubS(decoded_cols, cvScalar(col_shift), decoded_cols);
+*/
+
+
 	// Eliminate invalid column/row estimates.
     // Note: This will exclude pixels if either the column or row is missing or erroneous.
 	cvCmpS(decoded_cols, proj_width-1,  temp, CV_CMP_LE);
@@ -505,6 +528,8 @@ int decodeGrayCodes_S(int proj_width, int proj_height,
 	cvReleaseImage(&bit_plane_2);
 	cvReleaseImage(&temp);
 	cvReleaseImage(&thresh_hold);
+
+	delete [] answer;
 	// Return without errors.
 	return 0;
 }

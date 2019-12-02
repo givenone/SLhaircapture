@@ -109,3 +109,5 @@ struct slCalib{
 };
 
 void initialize_background(struct slParam *sl_params, struct slCalib *sl_calib);
+void shifting();
+void no_shfiting();
