@@ -566,6 +566,7 @@ int reconstructStructuredLight(struct slParams* sl_params,
 						for(int i=0; i<4; i++)
 							w[i] = sl_calib->proj_column_planes->data.fl[4*corresponding_column+i];
 						intersectLineWithPlane3D(q, v, w, point_cols, depth_cols);
+						//printf("%f %f %f,  d : %f\n", w[0], w[1], w[2], depth_cols);
 					}
 					// point와 depth를 triangulation을 이용하여 계산. point는 만나는 점의 위치고, depth는 float 값.
 
