@@ -228,7 +228,7 @@ void readConfiguration(const char* filename, struct slParams* sl_params){
 
 	// Read output directory and object (or sequence) name.
 
-	strcpy(sl_params->outdir, "output_shifting");
+	strcpy(sl_params->outdir, "output");
 	strcpy(sl_params->object, "output");
 	sl_params->save = true;
 
@@ -268,8 +268,8 @@ void readConfiguration(const char* filename, struct slParams* sl_params){
 
 	sl_params->thresh                  = 7;
 
-	sl_params->dist_range[0]           = (float) -800.0; //cvReadRealByName(fs, m, "minimum_distance_mm",              0.0);
-	sl_params->dist_range[1]           = (float) -500.0;//cvReadRealByName(fs, m, "maximum_distance_mm",            1.0e4);
+	sl_params->dist_range[0]           = (float) -850.0; //cvReadRealByName(fs, m, "minimum_distance_mm",              0.0);
+	sl_params->dist_range[1]           = (float) -600.0;//cvReadRealByName(fs, m, "maximum_distance_mm",            1.0e4);
 	sl_params->dist_reject             = (float) 10.0; //cvReadRealByName(fs, m, "maximum_distance_variation_mm",   10.0);
 	sl_params->background_depth_thresh = (float) 20.0; //cvReadRealByName(fs, m, "minimum_background_distance_mm",  20.0);
 

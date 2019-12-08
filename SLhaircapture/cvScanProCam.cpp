@@ -438,7 +438,7 @@ int decodeGrayCodes_S(int proj_width, int proj_height,
 
 	// Decode Gray codes for projector columns.
 	cvZero(decoded_cols);
-	for(int i=0; i<n_cols-2; i++){
+	for(int i=0; i<n_cols-1; i++){
 
 		// Decode bit-plane and update mask.
 		cvCvtColor(gray_codes[2*(i+1)],   gray_1, CV_RGB2GRAY);
@@ -478,7 +478,7 @@ int decodeGrayCodes_S(int proj_width, int proj_height,
 	char* data[8];
 	int *answer = new int[cam_height * cam_width];
 
-	for(int r=0; r<cam_height; r++)
+/*	for(int r=0; r<cam_height; r++)
 	{
 
 		for(int i=0; i<8; i++) 	
@@ -501,14 +501,14 @@ int decodeGrayCodes_S(int proj_width, int proj_height,
 					if(mx < val) {mx = val; idx = i;}
 				}
 
-				if(idx == 0 || idx == 1 || idx == 4 || idx == 5) plane_2[c] = 1; 
+				if(idx == 0 || idx == 1 || idx == 6 || idx == 7) plane_2[c] = 1; 
 				else plane_2[c] = 0;
 				plane_1[c] ^= plane_2[c];
 			}
 		}
 	}
 
-	cvAddS(decoded_cols, cvScalar(pow(2.0,n_cols-9)), decoded_cols, bit_plane_1);
+	cvAddS(decoded_cols, cvScalar(pow(2.0,n_cols-9)), decoded_cols, bit_plane_1);*/
 	
 	for(int r=0; r<cam_height; r++)
 	{
@@ -532,7 +532,7 @@ int decodeGrayCodes_S(int proj_width, int proj_height,
 					int val = (int)(0.25 * (float)data[i][c-1] + 0.25 * (float)data[i][c+1] + 0.5 * (float)data[i][c]); // filtering
 					if(mx < val) {mx = val; idx = i;}
 				}
-				if(idx == 0 || idx == 1 || idx == 2 || idx == 7) plane_2[c] = 1; 
+				if(idx == 1 || idx == 3 || idx == 4 || idx == 6) plane_2[c] = 1; 
 				else plane_2[c] = 0;
 				plane_1[c] ^= plane_2[c];
 			}
