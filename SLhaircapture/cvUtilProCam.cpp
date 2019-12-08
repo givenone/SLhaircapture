@@ -228,7 +228,7 @@ void readConfiguration(const char* filename, struct slParams* sl_params){
 
 	// Read output directory and object (or sequence) name.
 
-	strcpy(sl_params->outdir, "output");
+	strcpy(sl_params->outdir, "output_shifting");
 	strcpy(sl_params->object, "output");
 	sl_params->save = true;
 
@@ -237,8 +237,8 @@ void readConfiguration(const char* filename, struct slParams* sl_params){
 	sl_params->cam_h         =  2048;
 
 	// Read projector parameters.
-	sl_params->proj_w      = 800;//600;
-	sl_params->proj_h      = 600;//800;
+	sl_params->proj_w      = 800;
+	sl_params->proj_h      = 600;
 //	sl_params->proj_invert = false;
 
 	// Read camera and projector gain parameters.
@@ -266,10 +266,10 @@ void readConfiguration(const char* filename, struct slParams* sl_params){
 	sl_params->scan_cols               =  true; //      (cvReadIntByName(fs,  m, "reconstruct_columns",                1) != 0);
 	sl_params->scan_rows               =  false; //      (cvReadIntByName(fs,  m, "reconstruct_rows",                   1) != 0);
 
-	sl_params->thresh                  = 2;
+	sl_params->thresh                  = 7;
 
-	sl_params->dist_range[0]           = (float) -900.0; //cvReadRealByName(fs, m, "minimum_distance_mm",              0.0);
-	sl_params->dist_range[1]           = (float) -600.0;//cvReadRealByName(fs, m, "maximum_distance_mm",            1.0e4);
+	sl_params->dist_range[0]           = (float) -800.0; //cvReadRealByName(fs, m, "minimum_distance_mm",              0.0);
+	sl_params->dist_range[1]           = (float) -500.0;//cvReadRealByName(fs, m, "maximum_distance_mm",            1.0e4);
 	sl_params->dist_reject             = (float) 10.0; //cvReadRealByName(fs, m, "maximum_distance_variation_mm",   10.0);
 	sl_params->background_depth_thresh = (float) 20.0; //cvReadRealByName(fs, m, "minimum_background_distance_mm",  20.0);
 

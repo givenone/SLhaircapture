@@ -238,6 +238,11 @@ int decodeGrayCodes(int proj_width, int proj_height,
 		//cvOr(temp, mask, mask);
 
 		cvCmp(gray_1, gray_2, bit_plane_2, CV_CMP_GE);
+
+		char str[1024];
+		sprintf(str, "diff_%d.png", i);
+		cvSaveImage(str, bit_plane_2);
+		printf("saved %d image", i);
 		
 		// Convert from gray code to decimal value.
 		if(i>0)
@@ -431,71 +436,18 @@ int decodeGrayCodes_S(int proj_width, int proj_height,
 
 	// TODO :: Sine fitting -> figure out which point is which projector strip (not just by thresholding!)
 
-	IplImage* delta[4]; // difference
-	for(int i=0; i<4; i++) 
-	{
-		delta[i] = cvCreateImage(cvSize(cam_width, cam_height), IPL_DEPTH_8U,  1);
-		cvCvtColor(gray_codes[i+2*n_cols-2], gray_1, CV_RGB2GRAY);
-		cvCvtColor(gray_codes[i+2*n_cols+2], gray_2, CV_RGB2GRAY);
-		cvSub(gray_1, gray_2, delta[i]); // "0" for negative values.
-		char str[1024];
-		sprintf(str, "diff_%d.png", i);
-		cvSaveImage(str, delta[i]);
-		printf("saved %d image", i);
-	}
-
-
-	int diff[4];
-	char* data[4];
-	int *answer = new int[cam_height * cam_width];
-
-	for(int r=0; r<cam_height; r++)
-	{
-		bool sign[4];
-		for(int i=0; i<4; i++) 	
-		{
-			data[i] = (char*)(delta[i]->imageData + r*delta[i]->widthStep);
-			sign[i] = (int)data[i][0] == 0 ? true : false;
-		}
-		for(int c=0; c<cam_width; c++)
-		{
-			for(int i=0; i<4; i++) 
-			{
-				if( (int)data[i][c] > 0 )
-				{
-					if(sign[i]) // 0 -> +
-					{
-						sign[i] = false;
-						answer[r * cam_width + c] = i+1; 
-					}
-				}
-				else
-				{
-					if(!sign[i]) // + -> 0
-					{
-						sign[i] = true;
-						answer[r * cam_width + c] = i+5;
-					}
-				}
-			}
-			printf("%d ", answer[r * cam_width + c]); 
-		}
-		printf("\n\n");
-	}
 	// Decode Gray codes for projector columns.
-/*	cvZero(decoded_cols);
-	for(int i=0; i<n_cols; i++){
+	cvZero(decoded_cols);
+	for(int i=0; i<n_cols-2; i++){
 
 		// Decode bit-plane and update mask.
 		cvCvtColor(gray_codes[2*(i+1)],   gray_1, CV_RGB2GRAY);
 		cvCvtColor(gray_codes[2*(i+1)+1], gray_2, CV_RGB2GRAY);
 		cvAbsDiff(gray_1, gray_2, temp);
 		cvCmpS(temp, sl_thresh, temp, CV_CMP_GE);
-		
 		//cvOr(temp, mask, mask);
 
 		cvCmp(gray_1, gray_2, bit_plane_2, CV_CMP_GE);
-		
 		// Convert from gray code to decimal value.
 		if(i>0)
 			cvXor(bit_plane_1, bit_plane_2, bit_plane_1);
@@ -503,8 +455,92 @@ int decodeGrayCodes_S(int proj_width, int proj_height,
 			cvCopy(bit_plane_2, bit_plane_1);
 		cvAddS(decoded_cols, cvScalar(pow(2.0,n_cols-i-1)), decoded_cols, bit_plane_1);
 	}
+
+	IplImage* delta[8]; // difference
+	for(int i=0; i<4; i++) 
+	{
+		delta[i] = cvCreateImage(cvSize(cam_width, cam_height), IPL_DEPTH_8U,  1);
+		cvCvtColor(gray_codes[i+2*n_cols], gray_1, CV_RGB2GRAY);
+		cvCvtColor(gray_codes[i+2*n_cols+4], gray_2, CV_RGB2GRAY);
+		cvSub(gray_1, gray_2, delta[i]); // "0" for negative values.	
+	}
+
+
+
+	for(int i=0; i<4; i++) 
+	{
+		delta[i+4] = cvCreateImage(cvSize(cam_width, cam_height), IPL_DEPTH_8U,  1);
+		cvCvtColor(gray_codes[i+2*n_cols], gray_2, CV_RGB2GRAY);
+		cvCvtColor(gray_codes[i+2*n_cols+4], gray_1, CV_RGB2GRAY);
+		cvSub(gray_1, gray_2, delta[i+4]); // "0" for negative values.
+	}
+
+	char* data[8];
+	int *answer = new int[cam_height * cam_width];
+
+	for(int r=0; r<cam_height; r++)
+	{
+
+		for(int i=0; i<8; i++) 	
+		{
+			data[i] = (char*)(delta[i]->imageData + r*delta[i]->widthStep);
+		}
+
+		char *plane_2 = bit_plane_2->imageData + r * bit_plane_2->widthStep;
+		char *plane_1 = bit_plane_1->imageData + r * bit_plane_1->widthStep;
+		char *decoded = decoded_cols->imageData + r * decoded_cols->widthStep;
+		
+		for(int c=0; c<cam_width; c++)
+		{
+			if(c > 0 && c < cam_width)
+			{
+				int mx = 0, idx = 0;
+				for(int i=0; i<8; i++) 
+				{
+					int val = (int)(0.25 * (float)data[i][c-1] + 0.25 * (float)data[i][c+1] + 0.5 * (float)data[i][c]); // filtering
+					if(mx < val) {mx = val; idx = i;}
+				}
+
+				if(idx == 0 || idx == 1 || idx == 4 || idx == 5) plane_2[c] = 1; 
+				else plane_2[c] = 0;
+				plane_1[c] ^= plane_2[c];
+			}
+		}
+	}
+
+	cvAddS(decoded_cols, cvScalar(pow(2.0,n_cols-9)), decoded_cols, bit_plane_1);
+	
+	for(int r=0; r<cam_height; r++)
+	{
+
+		for(int i=0; i<8; i++) 	
+		{
+			data[i] = (char*)(delta[i]->imageData + r*delta[i]->widthStep);
+		}
+
+		char *plane_2 = bit_plane_2->imageData + r * bit_plane_2->widthStep;
+		char *plane_1 = bit_plane_1->imageData + r * bit_plane_1->widthStep;
+		char *decoded = decoded_cols->imageData + r * decoded_cols->widthStep;
+		
+		for(int c=0; c<cam_width; c++)
+		{
+			if(c > 0 && c < cam_width)
+			{
+				int mx = 0, idx = 0;
+				for(int i=0; i<8; i++) 
+				{
+					int val = (int)(0.25 * (float)data[i][c-1] + 0.25 * (float)data[i][c+1] + 0.5 * (float)data[i][c]); // filtering
+					if(mx < val) {mx = val; idx = i;}
+				}
+				if(idx == 0 || idx == 1 || idx == 2 || idx == 7) plane_2[c] = 1; 
+				else plane_2[c] = 0;
+				plane_1[c] ^= plane_2[c];
+			}
+		}
+	}
+
+	cvAddS(decoded_cols, cvScalar(pow(2.0,n_cols-10)), decoded_cols, bit_plane_1);
 	cvSubS(decoded_cols, cvScalar(col_shift), decoded_cols);
-*/
 
 
 	// Eliminate invalid column/row estimates.

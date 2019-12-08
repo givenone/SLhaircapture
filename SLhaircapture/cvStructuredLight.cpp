@@ -95,6 +95,61 @@ void config(struct slParams *sl_params, struct slCalib *sl_calib)
 	cvReleaseMat(&r);
 	cvReleaseMat(&t);
 	cvReleaseMat(&R);
+/*
+	float cam_intrinsic[3][3] ={ {5117.365927251628, 0, 1538.135121459372}, {0, 5116.093143162058, 1054.770061292614}, {0, 0, 1}};
+	float cam_distortion[5] = { -0.08890846682500254, 1.230751792208493, 0.0001003592840032126, -0.001586782878333563, 0};
+
+	for(int i=0; i<3; i++) 
+	{
+		for(int j=0; j<3; j++)
+		{
+			CV_MAT_ELEM(*sl_calib->cam_intrinsic, float, i, j) = cam_intrinsic[i][j];
+		}
+	}
+	for(int i=0; i<5; i++) CV_MAT_ELEM(*sl_calib->cam_distortion, float, i, 0) = cam_distortion[i];
+
+	float cam_rotation[9] = {-0.9306290660731862, -0.01079867427799931, -0.3658044969838218, 
+		0.001625296207708427, -0.9996766576441286, 0.02537594478439811, 
+		-0.3659602434582019, 0.02302105113371866, 0.9303457053228715 
+		};
+	float cam_translation[3] = {236.7497969219404, 3.627605952228119, 23.48881580363077};
+
+	CvMat* r = cvCreateMat(1, 3, CV_32FC1);
+	CvMat* t = cvCreateMat(1, 3, CV_32FC1);
+	CvMat* R = cvCreateMat(3, 3, CV_64F);
+	cvInitMatHeader(R, 3, 3, CV_32FC1, cam_rotation);
+	cvInitMatHeader(t, 1, 3, CV_32FC1, cam_translation);
+	cvRodrigues2(R, r, NULL); // rotation vector
+	for(int i=0; i<3; i++) CV_MAT_ELEM(*sl_calib->cam_extrinsic, float, 0, i) = (float)cvmGet(r, 0, i);
+	for(int i=0; i<3; i++) CV_MAT_ELEM(*sl_calib->cam_extrinsic, float, 1, i) = (float)cvmGet(t, 0, i);
+
+	float proj_intrinsic[3][3] = { {964.7284899784138, 0, 558.6978366123717},
+		{0, 1924.130089363177, 358.8594595895041},
+		{0, 0, 1} };
+	float proj_distortion[5] = { 0.07534034442346636, 0.005389851836038228, -0.00009209299757556229, 0.001663718345445374, 0 };
+	
+	for(int i=0; i<3; i++) 
+	{
+		for(int j=0; j<3; j++)
+		{
+			CV_MAT_ELEM(*sl_calib->proj_intrinsic, float, i, j) = proj_intrinsic[i][j];
+		}
+	}
+	for(int i=0; i<5; i++) CV_MAT_ELEM(*sl_calib->proj_distortion, float, i, 0) = proj_distortion[i];
+
+
+	float proj_rotation[9] = { 1, 0, 0, 0, 1, 0, 0, 0, 1};
+	float proj_translation[3] = {0, 0, 0};
+	cvInitMatHeader(R, 3, 3, CV_32FC1, proj_rotation);
+	cvInitMatHeader(t, 1, 3, CV_32FC1, proj_translation);
+	cvRodrigues2(R, r, NULL); // rotation vector
+	for(int i=0; i<3; i++) CV_MAT_ELEM(*sl_calib->proj_extrinsic, float, 0, i) = (float)cvmGet(r, 0, i);
+	for(int i=0; i<3; i++) CV_MAT_ELEM(*sl_calib->proj_extrinsic, float, 1, i) = (float)cvmGet(t, 0, i);
+
+	cvReleaseMat(&r);
+	cvReleaseMat(&t);
+	cvReleaseMat(&R);
+*/
 
 
 	cout << "read configuration" << endl;
@@ -247,11 +302,12 @@ void no_shfiting()
 	// read imange
 
 	IplImage** cam_gray_codes = NULL; char temp [100];
-	cam_gray_codes = new IplImage* [42];
+	cam_gray_codes = new IplImage* [50];
 	cout << gray_ncols << ' ' << gray_nrows <<endl;
 	for(int i=0; i<2*(gray_ncols+gray_nrows+1); i++)
 	{
-		sprintf(temp, "./Hair/inverse_pattern/%d.bmp", i);
+		//sprintf(temp, "./hair_1280/1280x720/%02d.bmp", i);
+		sprintf(temp, "./hair_800/inverse_pattern/%d.bmp", i);
 		//sprintf(temp, "./Face_6mp_01/800x600/%02d.png", i);
 		cam_gray_codes[i] = cvLoadImage(temp);
 	}		
@@ -324,19 +380,19 @@ void shifting()
 	// read imange
 
 	IplImage** cam_gray_codes = NULL; char temp [100];
-	cam_gray_codes = new IplImage* [2 * gray_ncols + 6];
+	cam_gray_codes = new IplImage* [2 * gray_ncols + 8];
 	cout << gray_ncols << ' ' << gray_nrows <<endl;
 
-	for(int i=0; i<2 * gray_ncols - 2; i++)
+	for(int i=0; i<2 * gray_ncols; i++)
 	{
-		sprintf(temp, "./Hair/shifting_revised/%d.bmp", i);
+		sprintf(temp, "./hair_800/shifting_revised/%d.bmp", i);
 		cam_gray_codes[i] = cvLoadImage(temp);
 	}		
 
 	for(int i= 1; i <= 8 ; i++)
 	{
-		sprintf(temp, "./Hair/shifting_revised/shift_%d.bmp", i);
-		cam_gray_codes[i + 2 * gray_ncols - 3] = cvLoadImage(temp);
+		sprintf(temp, "./hair_800/shifting_revised/shift_%d.bmp", i);
+		cam_gray_codes[i + 2 * gray_ncols - 1] = cvLoadImage(temp);
 	}
 
 	cout << "Successfully read all images" << endl;

@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<opencv_storage>
+<depth_map_range type_id="opencv-matrix">
+  <rows>1</rows>
+  <cols>2</cols>
+  <dt>f</dt>
+  <data>
+    -1000. -500.</data></depth_map_range>
+</opencv_storage>
