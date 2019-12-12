@@ -12,17 +12,15 @@
 //   the corresponding optical rays from the camera and projector are intersected; in this 
 //   case, the 3D point is assigned as the closest point to the two (generally skewed) rays.
 //   
-// Details:
-//   Please read the SIGGRAPH 2009 course notes for additional details.
-//
-//     Douglas Lanman and Gabriel Taubin
+//  Reference:
+//    Douglas Lanman and Gabriel Taubin
 //     "Build Your Own 3D Scanner: 3D Photography for Beginners"
 //     ACM SIGGRAPH 2009 Course Notes
 //
 // Author:
-//   Douglas Lanman
-//   Brown University
-//   July 2009
+//   SEO JUNWON
+//   Seoul National University
+//   December 2019
 // Run the background capture (used to eliminate background points from reconstructions).
 int runBackgroundCapture(CvCapture* capture, struct slParams* sl_params, struct slCalib* sl_calib);
 

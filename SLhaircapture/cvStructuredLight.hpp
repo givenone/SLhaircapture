@@ -5,17 +5,15 @@
 //   A user-supplied XML-formatted file is used to define system parameters for the console
 //   application. System calibration parameters can be loaded from prior instances.
 //
-// Details:
-//   Please read the SIGGRAPH 2009 course notes for additional details.
-//
-//     Douglas Lanman and Gabriel Taubin
+//  Reference:
+//    Douglas Lanman and Gabriel Taubin
 //     "Build Your Own 3D Scanner: 3D Photography for Beginners"
 //     ACM SIGGRAPH 2009 Course Notes
 //
 // Author:
-//   Douglas Lanman
-//   Brown University
-//   July 2009
+//   SEO JUNWON
+//   Seoul National University
+//   December 2019
 
 // Define structure for storing structured lighting parameters.
 #include "stdafx.h"
@@ -24,6 +22,11 @@ struct slParams{
 
 	// Output options.
 	char outdir[1024];	            // base output directory
+	char object[1024];              // object name
+	char image_format[1024];        // image path (without shifting)
+	char shifting_format[1024];		// shifting image path
+	char image_format_S[1024];		// image path (with shifting)
+
 	char object[1024];              // object name
 	bool save;                      // enable/disable saving of image sequence
 

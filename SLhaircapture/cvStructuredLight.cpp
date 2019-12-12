@@ -1,4 +1,13 @@
-// this file include main function
+// this file include main function\
+//  Reference:
+//    Douglas Lanman and Gabriel Taubin
+//     "Build Your Own 3D Scanner: 3D Photography for Beginners"
+//     ACM SIGGRAPH 2009 Course Notes
+//
+// Author:
+//   SEO JUNWON
+//   Seoul National University
+//   December 2019
 #include "stdafx.h"
 #include "cvStructuredLight.hpp"
 #include "cvScanProCam.h"
@@ -42,6 +51,8 @@ void config(struct slParams *sl_params, struct slCalib *sl_calib)
 	sl_calib->proj_column_planes     = cvCreateMat(sl_params->proj_w, 4, CV_32FC1);
 	sl_calib->proj_row_planes        = cvCreateMat(sl_params->proj_h, 4, CV_32FC1);
 
+
+// This is the calibration data of 800 x 600 projectors and camera
 	float cam_intrinsic[3][3] ={ {6799.891745995248, 0, 1684.663925292664}, {0, 6819.065266606978, 897.2080419838242}, {0, 0, 1}};
 	float cam_distortion[5] = { -0.1081234940885747, 1.019777262201034, -0.01496156727613678, 0.007012687213256888, 0};
 
@@ -95,7 +106,12 @@ void config(struct slParams *sl_params, struct slCalib *sl_calib)
 	cvReleaseMat(&r);
 	cvReleaseMat(&t);
 	cvReleaseMat(&R);
-/*
+/* 
+*
+*
+This is the Calibration data of the 1280 x 720 projector & camera
+*
+*
 	float cam_intrinsic[3][3] ={ {5117.365927251628, 0, 1538.135121459372}, {0, 5116.093143162058, 1054.770061292614}, {0, 0, 1}};
 	float cam_distortion[5] = { -0.08890846682500254, 1.230751792208493, 0.0001003592840032126, -0.001586782878333563, 0};
 
@@ -153,8 +169,6 @@ void config(struct slParams *sl_params, struct slCalib *sl_calib)
 
 
 	cout << "read configuration" << endl;
-	// precalcuate using calibration data
-
 }
 
 void save_codes(int width, int height, IplImage**& proj_gray_codes, int& gray_ncols, int& gray_nrows,
@@ -239,11 +253,6 @@ int save(struct slParams *sl_params, CvMat *depth_map, CvMat *points, CvMat *mas
 		cvReleaseMat(&dist_range);
 	}
 
-	// Save the texture map.
-	printf("Saving the texture map...\n");
-	sprintf(str, "%s/%s/%s_%0.2d.png", sl_params->outdir, sl_params->object, sl_params->object, scanindex);
-	//cvSaveImage(str, cam_gray_codes[0]);
-
 	// Save the point cloud.
 	printf("Saving the point cloud...\n");
 	sprintf(str, "%s/%s/%s_%0.2d.ply", sl_params->outdir, sl_params->object, sl_params->object, scanindex);
@@ -275,19 +284,16 @@ void no_shfiting()
 	IplImage** proj_gray_codes = NULL;
 	int gray_ncols, gray_nrows, gray_colshift, gray_rowshift;
 
-	int width = 800; int height = 600;
+// input calibration
+	struct slParams sl_params; //	configuration
+	struct slCalib sl_calib; //	calibration
+// Allocate storage for calibration parameters.
+	readConfiguration(NULL, &sl_params);	
+
+	int width = sl_params.proj_w; int height = sl_params.proj_h;
 
 	generateGrayCodes(width, height, proj_gray_codes, gray_ncols, gray_nrows, gray_colshift, gray_rowshift, 
 		true , true);
-
-//	save_codes(width, height, proj_gray_codes, gray_ncols, gray_nrows,gray_colshift, gray_rowshift);
-	
-	// input calibration
-	struct slParams sl_params; //	configuration
-	struct slCalib sl_calib; //	calibration
-	
-	// Allocate storage for calibration parameters.
-	readConfiguration(NULL, &sl_params);	
 	
 	config(&sl_params, &sl_calib);
 
@@ -306,8 +312,9 @@ void no_shfiting()
 	cout << gray_ncols << ' ' << gray_nrows <<endl;
 	for(int i=0; i<2*(gray_ncols+gray_nrows+1); i++)
 	{
+		sprintf(temp, sl_params.image_format, i);
 		//sprintf(temp, "./hair_1280/1280x720/%02d.bmp", i);
-		sprintf(temp, "./hair_800/inverse_pattern/%d.bmp", i);
+		//sprintf(temp, "./hair_800/inverse_pattern/%d.bmp", i);
 		//sprintf(temp, "./Face_6mp_01/800x600/%02d.png", i);
 		cam_gray_codes[i] = cvLoadImage(temp);
 	}		
@@ -348,17 +355,10 @@ void no_shfiting()
 
 void shifting()
 {
-	cout << "hi :: this is shiting-based decoding" <<endl;
+	cout << "hi :: this is shifting-based decoding" <<endl;
 
 	IplImage** proj_gray_codes = NULL;
 	int gray_ncols, gray_nrows, gray_colshift, gray_rowshift;
-
-	int width = 800; int height = 600;
-
-	generateGrayCodes(width, height, proj_gray_codes, gray_ncols, gray_nrows, gray_colshift, gray_rowshift, 
-		true , true);
-
-//	save_codes(width, height, proj_gray_codes, gray_ncols, gray_nrows,gray_colshift, gray_rowshift);
 
 	// input calibration
 	struct slParams sl_params; //	configuration
@@ -366,6 +366,11 @@ void shifting()
 	
 	// Allocate storage for calibration parameters.
 	readConfiguration(NULL, &sl_params);	
+
+	int width = sl_params.proj_w; int height = sl_params.proj_h;
+
+	generateGrayCodes(width, height, proj_gray_codes, gray_ncols, gray_nrows, gray_colshift, gray_rowshift, 
+		true , true);
 		
 	config(&sl_params, &sl_calib);
 
@@ -385,13 +390,13 @@ void shifting()
 
 	for(int i=0; i<2 * gray_ncols; i++)
 	{
-		sprintf(temp, "./hair_800/shifting_revised/%d.bmp", i);
+		sprintf(temp, sl_params.image_format_S, i);
 		cam_gray_codes[i] = cvLoadImage(temp);
 	}		
 
 	for(int i= 1; i <= 8 ; i++)
 	{
-		sprintf(temp, "./hair_800/shifting_revised/shift_%d.bmp", i);
+		sprintf(temp, sl_params.shifting_format, i);
 		cam_gray_codes[i + 2 * gray_ncols - 1] = cvLoadImage(temp);
 	}
 

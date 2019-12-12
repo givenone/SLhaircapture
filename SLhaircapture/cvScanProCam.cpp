@@ -1,28 +1,15 @@
 // cvScanProCam.cpp: Functions for structured light scanning.
 //
-// Overview:
-//   This file implements the functions for structured lighting. The current implementation
-//   supports a single projector-camera pair. The projector-camera system must be calibrated 
-//   prior to running the scanning function. A 3D point cloud and depth map are recovered by
-//   optical triangulation. Three scanning modes are implemented, including: (1) encoding only 
-//   the projector columns, (2) encoding only the projector rows, (3) encoding both rows and 
-//   columns. Two reconstruction methods are implemented, including: (1) "ray-plane" 
-//   triangulation and (2) "ray-ray" triangulation. In the former, each optical ray from the 
-//   camera is intersected with the corresponding projector column and/or row. In the later,
-//   the corresponding optical rays from the camera and projector are intersected; in this 
-//   case, the 3D point is assigned as the closest point to the two (generally skewed) rays.
-//   
-// Details:
-//   Please read the SIGGRAPH 2009 course notes for additional details.
 //
-//     Douglas Lanman and Gabriel Taubin
+//  Reference:
+//    Douglas Lanman and Gabriel Taubin
 //     "Build Your Own 3D Scanner: 3D Photography for Beginners"
 //     ACM SIGGRAPH 2009 Course Notes
 //
 // Author:
-//   Douglas Lanman
-//   Brown University
-//   July 2009
+//   SEO JUNWON
+//   Seoul National University
+//   December 2019
 
 #include "stdafx.h"
 #include "cvStructuredLight.hpp"
@@ -295,7 +282,13 @@ int decodeGrayCodes(int proj_width, int proj_height,
 	cvReleaseImage(&bit_plane_2);
 	cvReleaseImage(&temp);
 	// Initialize image mask (indicates reconstructed pixels).
-/*cvSet(mask, cvScalar(0));
+
+/*  
+*	
+*
+*	<<<< decoding without inverse image>>>>
+
+	cvSet(mask, cvScalar(0));
 
 	cvCvtColor(gray_codes[0], gray_1, CV_RGB2GRAY);
 	cvCvtColor(gray_codes[1], gray_2, CV_RGB2GRAY);
@@ -398,6 +391,7 @@ int decodeGrayCodes(int proj_width, int proj_height,
 //From phase spectrum find the corresponding phase shift θ for this given frequency - usually it is given in radians.
 //Reconstruct your signal as: x(t)=Asin(2πf0t+θ)
 // Decode Shifting Gray codes.
+
 int decodeGrayCodes_S(int proj_width, int proj_height,
 					IplImage**& gray_codes, 
 					IplImage*& decoded_cols,
@@ -434,11 +428,9 @@ int decodeGrayCodes_S(int proj_width, int proj_height,
 	
 	cout << n_cols << ' '<< n_rows << endl;
 
-	// TODO :: Sine fitting -> figure out which point is which projector strip (not just by thresholding!)
-
 	// Decode Gray codes for projector columns.
 	cvZero(decoded_cols);
-	for(int i=0; i<n_cols-1; i++){
+	for(int i=0; i<n_cols-2; i++){
 
 		// Decode bit-plane and update mask.
 		cvCvtColor(gray_codes[2*(i+1)],   gray_1, CV_RGB2GRAY);
@@ -478,7 +470,7 @@ int decodeGrayCodes_S(int proj_width, int proj_height,
 	char* data[8];
 	int *answer = new int[cam_height * cam_width];
 
-/*	for(int r=0; r<cam_height; r++)
+	for(int r=0; r<cam_height; r++)
 	{
 
 		for(int i=0; i<8; i++) 	
@@ -508,7 +500,7 @@ int decodeGrayCodes_S(int proj_width, int proj_height,
 		}
 	}
 
-	cvAddS(decoded_cols, cvScalar(pow(2.0,n_cols-9)), decoded_cols, bit_plane_1);*/
+	cvAddS(decoded_cols, cvScalar(pow(2.0,n_cols-9)), decoded_cols, bit_plane_1);
 	
 	for(int r=0; r<cam_height; r++)
 	{
@@ -532,12 +524,17 @@ int decodeGrayCodes_S(int proj_width, int proj_height,
 					int val = (int)(0.25 * (float)data[i][c-1] + 0.25 * (float)data[i][c+1] + 0.5 * (float)data[i][c]); // filtering
 					if(mx < val) {mx = val; idx = i;}
 				}
-				if(idx == 1 || idx == 3 || idx == 4 || idx == 6) plane_2[c] = 1; 
+				if(idx == 0 || idx == 3 || idx == 4|| idx == 7) plane_2[c] = 255; 
 				else plane_2[c] = 0;
 				plane_1[c] ^= plane_2[c];
 			}
 		}
 	}
+
+	char str[1024];
+
+	sprintf(str, "shift_reconst.png", str);
+	cvSaveImage(str, bit_plane_2);
 
 	cvAddS(decoded_cols, cvScalar(pow(2.0,n_cols-10)), decoded_cols, bit_plane_1);
 	cvSubS(decoded_cols, cvScalar(col_shift), decoded_cols);
@@ -629,7 +626,7 @@ int reconstructStructuredLight(struct slParams* sl_params,
 						intersectLineWithPlane3D(q, v, w, point_cols, depth_cols);
 						//printf("%f %f %f,  d : %f\n", w[0], w[1], w[2], depth_cols);
 					}
-					// point와 depth를 triangulation을 이용하여 계산. point는 만나는 점의 위치고, depth는 float 값.
+					// point와 depth를 triangulation을 이용하여 계산. point는 만나는 점의 위치고, depth는 float.
 
 					// Intersect camera ray with corresponding projector row.
 					if(sl_params->scan_rows){
@@ -643,8 +640,7 @@ int reconstructStructuredLight(struct slParams* sl_params,
 						for(int i=0; i<4; i++)
 							w[i] = sl_calib->proj_row_planes->data.fl[4*corresponding_row+i];
 						intersectLineWithPlane3D(q, v, w, point_rows, depth_rows);
-						//printf("%f %f %f, %f %f %f, %f %f %f, h : %f , d : %f\n", q[0], q[1], q[2], v[0], v[1], v[2], w[0], w[1], w[2],
-						//point_rows[2], depth_rows);
+
 					}
 
 					// Average points of intersection (if row and column scanning are both enabled).
@@ -715,22 +711,6 @@ int reconstructStructuredLight(struct slParams* sl_params,
 						colors->data.fl[sl_params->cam_w*r+c+cam_nelems*i] = 0;
 				}
 
-				// Reject background points.
-				// Note: Currently only uses depth to determine foreground vs. background pixels.
-	/*			float depth_difference = 
-					background_depth_map->data.fl[sl_params->cam_w*r+c] - 
-					depth_map->data.fl[sl_params->cam_w*r+c];
-				if(depth_difference < sl_params->background_depth_thresh && 
-				   gray_mask_data[r*gray_mask_step+c] && 
-				   background_mask_data[r*background_mask_step+c]){
-					gray_mask_data[r*gray_mask_step+c] = 0;
-					mask->data.fl[sl_params->cam_w*r+c] = 0;
-					depth_map->data.fl[sl_params->cam_w*r+c] = 0;
-					for(int i=0; i<3; i++)
-						points->data.fl[sl_params->cam_w*r+c+cam_nelems*i] = 0;
-					for(int i=0; i<3; i++)
-						colors->data.fl[sl_params->cam_w*r+c+cam_nelems*i] = 0;x
-				}*/
 			}
 		}
 	}

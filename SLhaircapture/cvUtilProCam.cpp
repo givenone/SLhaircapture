@@ -5,17 +5,15 @@
 //   include basic operations, such as the base-2 logarithm, as well as geometric algorithms, 
 //   including fitting planes to 3D points and intersecting lines with other lines and planes.
 //
-// Details:
-//   Please read the SIGGRAPH 2009 course notes for additional details.
-//
-//     Douglas Lanman and Gabriel Taubin
+//  Reference:
+//    Douglas Lanman and Gabriel Taubin
 //     "Build Your Own 3D Scanner: 3D Photography for Beginners"
 //     ACM SIGGRAPH 2009 Course Notes
 //
 // Author:
-//   Douglas Lanman
-//   Brown University
-//   July 2009
+//   SEO JUNWON
+//   Seoul National University
+//   December 2019
 #include "stdafx.h"
 #include "cvStructuredLight.hpp"
 #include "cvUtilProCam.h"
@@ -230,6 +228,10 @@ void readConfiguration(const char* filename, struct slParams* sl_params){
 
 	strcpy(sl_params->outdir, "output");
 	strcpy(sl_params->object, "output");
+	strcpy(sl_params->image_format, "./hair_800/inverse_pattern/%d.bmp");
+	strcpy(sl_params->image_format_S,"./hair_800/shifting_revised/%d.bmp");
+	strcpy(sl_params->shifting_format,"./hair_800/shifting_revised/shift_%d.bmp");
+
 	sl_params->save = true;
 
 	// Read camera parameters.
@@ -239,39 +241,21 @@ void readConfiguration(const char* filename, struct slParams* sl_params){
 	// Read projector parameters.
 	sl_params->proj_w      = 800;
 	sl_params->proj_h      = 600;
-//	sl_params->proj_invert = false;
 
-	// Read camera and projector gain parameters.
-	sl_params->cam_gain  = 50;//cvReadIntByName(fs, m, "camera_gain",     50);
-	sl_params->proj_gain = 50;//cvReadIntByName(fs, m, "projector_gain",  50);
-/*	
-	// Read distortion model parameters.
-	m = cvGetFileNodeByName(fs, 0, "distortion_model");
-	sl_params->cam_dist_model[0]  = (cvReadIntByName(fs, m, "enable_tangential_camera",          0) != 0);
-	sl_params->cam_dist_model[1]  = (cvReadIntByName(fs, m, "enable_6th_order_radial_camera",    0) != 0);
-	sl_params->proj_dist_model[0] = (cvReadIntByName(fs, m, "enable_tangential_projector",       0) != 0);
-	sl_params->proj_dist_model[1] = (cvReadIntByName(fs, m, "enable_6th_order_radial_projector", 0) != 0);
 
-	// Read camera calibration chessboard parameters.
-	m = cvGetFileNodeByName(fs, 0, "camera_chessboard");
-	sl_params->cam_board_w    =        cvReadIntByName(fs,  m, "interior_horizontal_corners",    8);
-	sl_params->cam_board_h    =        cvReadIntByName(fs,  m, "interior_vertical_corners",      6);
-	sl_params->cam_board_w_mm = (float)cvReadRealByName(fs, m, "square_width_mm",             30.0);
-	sl_params->cam_board_h_mm = (float)cvReadRealByName(fs, m, "square_height_mm",            30.0);
-*/	
 	// Read scanning and reconstruction parameters.
 
 	// **** mode 1이면 ray-plane or ray-ray 2이면 ray-ray
-	sl_params->mode                    =  1;      // cvReadIntByName(fs,  m, "mode",                               2);
-	sl_params->scan_cols               =  true; //      (cvReadIntByName(fs,  m, "reconstruct_columns",                1) != 0);
-	sl_params->scan_rows               =  false; //      (cvReadIntByName(fs,  m, "reconstruct_rows",                   1) != 0);
+	sl_params->mode                    =  1;      
+	sl_params->scan_cols               =  true; 
+	sl_params->scan_rows               =  false;
 
 	sl_params->thresh                  = 7;
 
-	sl_params->dist_range[0]           = (float) -850.0; //cvReadRealByName(fs, m, "minimum_distance_mm",              0.0);
-	sl_params->dist_range[1]           = (float) -600.0;//cvReadRealByName(fs, m, "maximum_distance_mm",            1.0e4);
-	sl_params->dist_reject             = (float) 10.0; //cvReadRealByName(fs, m, "maximum_distance_variation_mm",   10.0);
-	sl_params->background_depth_thresh = (float) 20.0; //cvReadRealByName(fs, m, "minimum_background_distance_mm",  20.0);
+	sl_params->dist_range[0]           = (float) -850.0;
+	sl_params->dist_range[1]           = (float) -650.0;
+	sl_params->dist_reject             = (float) 10.0;
+	sl_params->background_depth_thresh = (float) 20.0;
 
 	// Enable both row and column scanning, if "ray-ray" reconstruction mode is enabled.
 	if(sl_params->mode == 2){
