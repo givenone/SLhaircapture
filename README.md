@@ -18,12 +18,13 @@
 
 # Things you should change
 
-- [cvUtilProCam.cpp](./cvUtilProCam.cpp)
+- [cvUtilProCam.cpp](./SLhaircapture/cvUtilProCam.cpp)
 
 * This lines
 ```cpp
 
-  strcpy(sl_params->outdir, //TODO : output directory name);
+
+	strcpy(sl_params->outdir, //TODO : output directory name);
 	strcpy(sl_params->object, //TODO : output file name);
 	strcpy(sl_params->image_format, //TODO : image file format string );
 	strcpy(sl_params->image_format_S,//TODO : shifting based normal image format string);
