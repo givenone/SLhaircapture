@@ -226,10 +226,6 @@ int decodeGrayCodes(int proj_width, int proj_height,
 
 		cvCmp(gray_1, gray_2, bit_plane_2, CV_CMP_GE);
 
-		char str[1024];
-		sprintf(str, "diff_%d.png", i);
-		cvSaveImage(str, bit_plane_2);
-		printf("saved %d image", i);
 		
 		// Convert from gray code to decimal value.
 		if(i>0)

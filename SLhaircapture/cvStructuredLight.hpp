@@ -27,7 +27,6 @@ struct slParams{
 	char shifting_format[1024];		// shifting image path
 	char image_format_S[1024];		// image path (with shifting)
 
-	char object[1024];              // object name
 	bool save;                      // enable/disable saving of image sequence
 
 	// Camera options.
