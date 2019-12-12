@@ -1,4 +1,5 @@
-# SLhaircapture 2019 fall SNU 창의적통합설계 with Morpheus 3D
+# SLhaircapture 
+## 2019 fall SNU 창의적통합설계 with Morpheus 3D
 
 # How to use
 
