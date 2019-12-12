@@ -253,7 +253,7 @@ void readConfiguration(const char* filename, struct slParams* sl_params){
 	sl_params->thresh                  = 7;
 
 	sl_params->dist_range[0]           = (float) -850.0;
-	sl_params->dist_range[1]           = (float) -650.0;
+	sl_params->dist_range[1]           = (float) -600.0;
 	sl_params->dist_reject             = (float) 10.0;
 	sl_params->background_depth_thresh = (float) 20.0;
 

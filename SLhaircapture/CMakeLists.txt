@@ -4,5 +4,5 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 find_package( OpenCV REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
-add_executable( temp stdafx.cpp cvScanProCam.cpp cvStructuredLight.cpp cvCalibrateProCam.cpp cvUtilProCam.cpp)
+add_executable( scanner stdafx.cpp cvScanProCam.cpp cvStructuredLight.cpp cvCalibrateProCam.cpp cvUtilProCam.cpp)
 target_link_libraries( temp ${OpenCV_LIBS} )
